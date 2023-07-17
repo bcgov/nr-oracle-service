@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Deploy to OpenShift
         shell: bash
-        run: >-
+        run: |
           # Allow pipefail, since we could be catching oc create errors
           set +o pipefail
           
