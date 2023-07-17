@@ -58,10 +58,9 @@ jobs:
           oc project ${{ vars.oc_namespace }}
           
           # Deploy Helm Chart
-          helm upgrade --install --atomic ${{ github.event.number }} nr-oracle-service-${{ github.event.number }}
-          --namespace  ${{ vars.oc_namespace }}
-          --repo ${{ github.repository }}
-          --set image.tag=${{ github.event.number }}
-          --set image.initTag=${{ github.event.number }}
-          --timeout 10m
-          --wait
+          helm upgrade --install --atomic ${{ github.event.number }} nr-oracle-service-${{ github.event.number }} \
+          --namespace  ${{ vars.oc_namespace }} \
+          --repo ${{ github.repository }} \
+          --set image.tag=${{ github.event.number }} \
+          --set image.initTag=${{ github.event.number }} \
+          --timeout 10m --wait
