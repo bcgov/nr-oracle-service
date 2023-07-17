@@ -1,0 +1,88 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nr-oracle-service.fullname" . }}
+  labels: 
+    {{- include "nr-oracle-service.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: 
+      {{- include "nr-oracle-service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nr-oracle-service.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POOL_MIN_SIZE
+              value: {{ required "A valid .Values.app.envs.POOL_MIN_SIZE entry required!" .Values.app.envs.POOL_MIN_SIZE  | quote }}
+            - name: DB_PASSWORD
+              value: {{ required "A valid .Values.app.envs.DB_PASSWORD entry required!" .Values.app.envs.DB_PASSWORD  | quote }}
+            - name: DB_PORT
+              value: {{ required "A valid .Values.app.envs.DB_PORT entry required!" .Values.app.envs.DB_PORT  | quote }}
+            - name: HTTP_PORT
+              value: {{ required "A valid .Values.app.envs.HTTP_PORT entry required!" .Values.app.envs.HTTP_PORT  | quote }}
+            - name: POOL_IDLE_TIMEOUT
+              value: {{ required "A valid .Values.app.envs.POOL_IDLE_TIMEOUT entry required!" .Values.app.envs.POOL_IDLE_TIMEOUT  | quote }}
+            - name: DB_USER
+              value: {{ required "A valid .Values.app.envs.DB_USER entry required!" .Values.app.envs.DB_USER  | quote }}
+            - name: DB_SECRET
+              value: {{ required "A valid .Values.app.envs.DB_SECRET entry required!" .Values.app.envs.DB_SECRET  | quote }}
+            - name: DB_HOST
+              value: {{ required "A valid .Values.app.envs.DB_HOST entry required!" .Values.app.envs.DB_HOST  | quote }}
+            - name: POOL_INITIAL_SIZE
+              value: {{ required "A valid .Values.app.envs.POOL_INITIAL_SIZE entry required!" .Values.app.envs.POOL_INITIAL_SIZE  | quote }}
+            - name: POOL_MAX_SIZE
+              value: {{ required "A valid .Values.app.envs.POOL_MAX_SIZE entry required!" .Values.app.envs.POOL_MAX_SIZE  | quote }}
+            - name: DB_NAME
+              value: {{ required "A valid .Values.app.envs.DB_NAME entry required!" .Values.app.envs.DB_NAME  | quote }}
+            - name: POOL_MAX_LIFETIME
+              value: {{ required "A valid .Values.app.envs.POOL_MAX_LIFETIME entry required!" .Values.app.envs.POOL_MAX_LIFETIME  | quote }}
+            - name: POOL_LEAK_DETECTION_INTERVAL
+              value: {{ required "A valid .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL entry required!" .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL  | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

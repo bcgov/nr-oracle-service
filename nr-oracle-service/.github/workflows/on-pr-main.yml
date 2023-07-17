@@ -1,0 +1,41 @@
+name: Build and Deploy of Job on Pull Request to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+  
+
+concurrency:
+    group: ${{ github.workflow }}
+    cancel-in-progress: true
+
+jobs:
+  builds:
+    name: Builds
+    if: '!github.event.pull_request.head.repo.fork'
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [nr-oracle-service, nr-oracle-service-init]
+        include:
+          - package: nr-oracle-service
+            build_file: Dockerfile
+            
+          - package: nr-oracle-service-init
+            build_file: Dockerfile.certs
+           
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bcgov-nr/action-builder-ghcr@v1.1.2
+        with:
+          package: ${{ matrix.package }}
+          tag: test
+          token: ${{ secrets.GITHUB_TOKEN }}
+          build_file: ${{ matrix.build_file }}
+
+
+
