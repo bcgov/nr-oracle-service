@@ -37,6 +37,6 @@ jobs:
           tag: test
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
-
-
+          build_context: ${{ matrix.build_context }}
+ 
 
