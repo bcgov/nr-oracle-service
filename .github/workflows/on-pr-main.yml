@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-  
+
 
 concurrency:
     group: ${{ github.workflow }}
@@ -27,16 +27,41 @@ jobs:
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
-           
+
 
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
-          tag: test
+          tag: ${{ github.event.number }}
+          tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
- 
 
+
+  deploys:
+    name: Deploys
+    needs:
+      - builds
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Deploy to OpenShift
+        shell: bash
+        run: >-
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          helm upgrade --install --atomic ${{ github.event.number }} nr-oracle-service-${{ github.event.number }}
+          --namespace  ${{ vars.oc_namespace }}
+          --repo ${{ github.repository }}
+          --set image.tag=${{ github.event.number }}
+          --set image.initTag=${{ github.event.number }}
+          --timeout 10m
+          --wait
