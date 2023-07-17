@@ -1,5 +1,8 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+target/*-runner
+target/*-runner.jar
+target/lib/*
+target/quarkus-app/*
+.gitignore
+.idea/*
+.github/*
+charts/*
