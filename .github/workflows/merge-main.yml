@@ -6,9 +6,6 @@ on:
       - 'charts/**'
     branches:
       - main
-    paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
-      - "**.md"
   workflow_dispatch:
 
 concurrency:
