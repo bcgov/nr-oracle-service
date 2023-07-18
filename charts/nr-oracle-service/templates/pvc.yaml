@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "nr-oracle-service.fullname" . }}
+  name: {{ include "nr-oracle-service.name" . }}
   labels:
     {{- include "nr-oracle-service.labels" . | nindent 4 }}
 spec:

@@ -1,32 +1,32 @@
 ---
-apiVersion: v1
+apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: {{ include "nr-oracle-service.fullname" . }}
-  labels:
-    {{- include "nr-oracle-service.labels" . | nindent 4 }}
-spec:
-  lookupPolicy:
-  local: false
-  tags:
-    - name: ${IMAGE_TAG}
-      from:
-        kind: DockerImage
-        name: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-      referencePolicy:
-        type: Local
----
-apiVersion: v1
-kind: ImageStream
-metadata:
-  name: {{ include "nr-oracle-service.fullname" . }}-init
+  name: {{ include "nr-oracle-service.name" . }}
   labels:
     {{- include "nr-oracle-service.labels" . | nindent 4 }}
 spec:
   lookupPolicy:
     local: false
   tags:
-    - name: ${IMAGE_TAG}
+    - name: "{{ .Values.image.tag }}"
+      from:
+        kind: DockerImage
+        name: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+      referencePolicy:
+        type: Local
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{ include "nr-oracle-service.name" . }}-init
+  labels:
+    {{- include "nr-oracle-service.labels" . | nindent 4 }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+    - name: "{{ .Values.image.initTag }}"
       from:
         kind: DockerImage
         name: "{{ .Values.image.repositoryInit }}:{{ .Values.image.initTag | default .Chart.AppVersion }}"

@@ -57,10 +57,8 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
           
+          #go to helm directory
+          cd charts/nr-oracle-service
+          
           # Deploy Helm Chart
-          helm upgrade --install --atomic ${{ github.event.number }} nr-oracle-service-${{ github.event.number }} \
-          --namespace  ${{ vars.oc_namespace }} \
-          --repo ${{ github.repository }} \
-          --set image.tag=${{ github.event.number }} \
-          --set image.initTag=${{ github.event.number }} \
-          --timeout 10m --wait
+          helm upgrade --install --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=${{ github.event.number }}  --set image.initTag=${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }}  --namespace  ${{ vars.oc_namespace }}  --timeout 10m --wait .

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.sql.SQLException;
 
@@ -16,6 +17,8 @@ import java.sql.SQLException;
 @Consumes(MediaType.APPLICATION_JSON)
 public class Application {
 
+  @ConfigProperty(name = "api.key")
+  String apiKey;
   private final QueryExecutorService queryExecutorService;
 
   @Inject
@@ -33,7 +36,10 @@ public class Application {
   }
 
   @POST
-  public Response executeSQL(@Valid Payload payload) throws SQLException {
+  public Response executeSQL(@HeaderParam("X-API-Key") String xApiKey, @Valid Payload payload) throws SQLException {
+    if (!apiKey.equals(xApiKey)) {
+      return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
     if (payload.queryType() == QueryType.READ) {
       return Response.ok(queryExecutorService.executeQuery(payload.sql())).build();
     }

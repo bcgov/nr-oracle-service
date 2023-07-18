@@ -11,12 +11,11 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ~
-  initTag: ~
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
+namespace:
 serviceAccount:
   enabled: false
   # Specifies whether a service account should be created
@@ -72,12 +71,10 @@ affinity: {}
 
 app:
   envs:
-    DB_HOST: "default"
-    DB_NAME: "default"
-    DB_PASSWORD: "default"
-    DB_PORT: "default"
-    DB_SECRET: "default"
-    DB_USER: "default"
+    DB_HOST: ~
+    DB_NAME: ~
+    DB_PASSWORD: ~
+    DB_USER: ~
     HTTP_PORT: "3000"
     POOL_IDLE_TIMEOUT: "60000"
     POOL_INITIAL_SIZE: "2"
