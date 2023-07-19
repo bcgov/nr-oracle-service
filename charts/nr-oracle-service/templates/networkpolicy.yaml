@@ -2,9 +2,9 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-    name: "allow-apps-to-connect-to-{{ include nr-oracle-service.name . }}"
+    name: allow-apps-to-connect-to-{{ include "nr-oracle-service.name" . }}
     labels:
-    {{- include "nr-oracle-service.labels" . | nindent 4 }}
+    {{- include "nr-oracle-service.labels" . | nindent 6 }}
 spec:
     podSelector: {}
     ingress:
