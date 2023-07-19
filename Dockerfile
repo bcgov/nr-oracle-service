@@ -1,12 +1,13 @@
-FROM maven:alpine AS build
-COPY mvnw /code/mvnw
-COPY .mvn /code/.mvn
-COPY  pom.xml /code/
+FROM quay.io/quarkus/ubi-quarkus-native-image:22.3.0-java17 AS build
+COPY --chown=quarkus:quarkus mvnw /code/mvnw
+COPY --chown=quarkus:quarkus .mvn /code/.mvn
+COPY --chown=quarkus:quarkus pom.xml /code/
+USER quarkus
 WORKDIR /code
 RUN chmod +x mvnw
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
-RUN ./mvnw package  -Dnative -DskipTests -Dquarkus.native.container-build=true
+RUN ./mvnw package -Pnative -DskipTests
 HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 FROM quay.io/quarkus/quarkus-micro-image:2.0
