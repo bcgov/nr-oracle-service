@@ -40,6 +40,21 @@ Prerequisites:
   }`. This is done in a transaction context and the data is committed to DB and if commit success then 200 Ok response
   is sent. [look here](./src/main/java/ca/bc/gov/nrs/api/service/QueryExecutorService.java#L67).
 
+## Sequence flow
+```mermaid
+sequenceDiagram
+    participant Consuming App
+    participant OracleProxyApplication
+    Consuming App ->>+ OracleProxyApplication: Send POST request with API key (X-API-key)
+    OracleProxyApplication->>+OracleProxyApplication: Validate API key
+    OracleProxyApplication-->>-Consuming App: Return unauthorized error (if API key is invalid)
+    OracleProxyApplication ->>+ Payload: Validate payload
+    Payload -->>- OracleProxyApplication: Return validation errors (if any)
+    OracleProxyApplication ->>+ QueryExecutorService: Execute SQL query
+    QueryExecutorService -->>- OracleProxyApplication: Return query result
+    OracleProxyApplication -->>- Consuming App: Return query result
+```
+
 ## Development
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
