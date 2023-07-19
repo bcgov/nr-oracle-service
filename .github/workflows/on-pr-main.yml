@@ -57,6 +57,6 @@ jobs:
           # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ vars.oc_namespace }}
-          ls -R
+          
           # Deploy Helm Chart
           helm upgrade --install --wait --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=${{ github.event.number }}  --set image.initTag=${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }}  --namespace  ${{ vars.oc_namespace }}  --timeout 10m charts/nr-oracle-service --debug
