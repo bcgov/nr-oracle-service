@@ -1,8 +1,7 @@
 FROM maven:alpine AS build
-COPY --chown=quarkus:quarkus mvnw /code/mvnw
-COPY --chown=quarkus:quarkus .mvn /code/.mvn
-COPY --chown=quarkus:quarkus pom.xml /code/
-USER quarkus
+COPY mvnw /code/mvnw
+COPY .mvn /code/.mvn
+COPY  pom.xml /code/
 WORKDIR /code
 RUN chmod +x mvnw
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
