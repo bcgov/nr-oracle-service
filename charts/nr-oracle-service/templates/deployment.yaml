@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nr-oracle-service.fullname" . }}
+  name: {{ include "nr-oracle-service.name" . }}
   labels: 
     {{- include "nr-oracle-service.labels" . | nindent 4 }}
 spec:
@@ -21,17 +21,43 @@ spec:
       labels:
         {{- include "nr-oracle-service.selectorLabels" . | nindent 8 }}
     spec:
+      volumes:
+        - name: {{ include "nr-oracle-service.name" . }}
+          persistentVolumeClaim:
+            claimName: {{ include "nr-oracle-service.name" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: {{ .Chart.Name }}-init
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "nr-oracle-service.fullname" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: dbHost
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: CERT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: certSecret
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: DB_PORT
+              value: "1543"
+          volumeMounts:
+            - name: {{ include "nr-oracle-service.name" . }}
+              mountPath: /app/cert
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "nr-oracle-service.fullname" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.app.envs.HTTP_PORT }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -48,41 +74,52 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: dbPassword
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: dbUser
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: dbName
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: dbHost
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: apiKey
+                  name: {{ include "nr-oracle-service.name" . }}
+            - name: DB_PORT
+              value: '1543'
+            - name: CERT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: certSecret
+                  name: {{ include "nr-oracle-service.name" . }}
             - name: POOL_MIN_SIZE
               value: {{ required "A valid .Values.app.envs.POOL_MIN_SIZE entry required!" .Values.app.envs.POOL_MIN_SIZE  | quote }}
-            - name: DB_PASSWORD
-              value: {{ required "A valid .Values.app.envs.DB_PASSWORD entry required!" .Values.app.envs.DB_PASSWORD  | quote }}
-            - name: DB_PORT
-              value: {{ required "A valid .Values.app.envs.DB_PORT entry required!" .Values.app.envs.DB_PORT  | quote }}
             - name: HTTP_PORT
               value: {{ required "A valid .Values.app.envs.HTTP_PORT entry required!" .Values.app.envs.HTTP_PORT  | quote }}
             - name: POOL_IDLE_TIMEOUT
               value: {{ required "A valid .Values.app.envs.POOL_IDLE_TIMEOUT entry required!" .Values.app.envs.POOL_IDLE_TIMEOUT  | quote }}
-            - name: DB_USER
-              value: {{ required "A valid .Values.app.envs.DB_USER entry required!" .Values.app.envs.DB_USER  | quote }}
-            - name: DB_SECRET
-              value: {{ required "A valid .Values.app.envs.DB_SECRET entry required!" .Values.app.envs.DB_SECRET  | quote }}
-            - name: DB_HOST
-              value: {{ required "A valid .Values.app.envs.DB_HOST entry required!" .Values.app.envs.DB_HOST  | quote }}
             - name: POOL_INITIAL_SIZE
               value: {{ required "A valid .Values.app.envs.POOL_INITIAL_SIZE entry required!" .Values.app.envs.POOL_INITIAL_SIZE  | quote }}
             - name: POOL_MAX_SIZE
               value: {{ required "A valid .Values.app.envs.POOL_MAX_SIZE entry required!" .Values.app.envs.POOL_MAX_SIZE  | quote }}
-            - name: DB_NAME
-              value: {{ required "A valid .Values.app.envs.DB_NAME entry required!" .Values.app.envs.DB_NAME  | quote }}
             - name: POOL_MAX_LIFETIME
               value: {{ required "A valid .Values.app.envs.POOL_MAX_LIFETIME entry required!" .Values.app.envs.POOL_MAX_LIFETIME  | quote }}
             - name: POOL_LEAK_DETECTION_INTERVAL
               value: {{ required "A valid .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL entry required!" .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL  | quote }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+          volumeMounts:
+            - name: {{ include "nr-oracle-service.name" . }}
+              mountPath: /app/cert

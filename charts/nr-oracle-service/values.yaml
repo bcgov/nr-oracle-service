@@ -6,7 +6,8 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/nr-oracle-service
+  repository: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service
+  repositoryInit: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service-init
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ~
@@ -14,7 +15,7 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
+namespace:
 serviceAccount:
   enabled: false
   # Specifies whether a service account should be created
@@ -42,21 +43,6 @@ service:
   type: ClusterIP
   port: 80
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -64,10 +50,10 @@ resources:
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
-    cpu: 200m
-    memory: 512Mi
-  requests:
     cpu: 100m
+    memory: 256Mi
+  requests:
+    cpu: 30m
     memory: 128Mi
 
 autoscaling:
@@ -85,18 +71,16 @@ affinity: {}
 
 app:
   envs:
-    DB_HOST: "default"
-    DB_NAME: "default"
-    DB_PASSWORD: "default"
-    DB_PORT: "default"
-    DB_SECRET: "default"
-    DB_USER: "default"
+    DB_HOST: ~
+    DB_NAME: ~
+    DB_PASSWORD: ~
+    DB_USER: ~
     HTTP_PORT: "3000"
     POOL_IDLE_TIMEOUT: "60000"
-    POOL_INITIAL_SIZE: "2"
-    POOL_LEAK_DETECTION_INTERVAL: "300000"
+    POOL_INITIAL_SIZE: "1"
+    POOL_LEAK_DETECTION_INTERVAL: "45000"
     POOL_MAX_LIFETIME: "180000"
-    POOL_MAX_SIZE: "2"
-    POOL_MIN_SIZE: "2"
+    POOL_MAX_SIZE: "1"
+    POOL_MIN_SIZE: "1"
   ports:
     http: 3000

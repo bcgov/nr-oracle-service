@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-  
+
 
 concurrency:
     group: ${{ github.workflow }}
@@ -23,19 +23,40 @@ jobs:
         include:
           - package: nr-oracle-service
             build_file: Dockerfile
-            
+            build_context: .
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
-           
+            build_context: .
+
 
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
-          tag: test
+          tag: ${{ github.event.number }}
+          tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
+          build_context: ${{ matrix.build_context }}
 
 
-
+  deploys:
+    name: Deploys
+    needs:
+      - builds
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to OpenShift
+        shell: bash
+        run: |
+          # Allow pipefail, since we could be catching oc create errors
+          set +o pipefail
+          
+          # Login to OpenShift (NOTE: project command is a safeguard)
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.oc_namespace }}
+          
+          # Deploy Helm Chart
+          helm upgrade --install --wait --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=${{ github.event.number }}  --set image.initTag=${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }}  --namespace  ${{ vars.oc_namespace }}  --timeout 10m charts/nr-oracle-service --debug
