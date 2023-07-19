@@ -37,12 +37,12 @@ spec:
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  key: db-host
+                  key: dbHost
                   name: {{ include "nr-oracle-service.name" . }}
             - name: CERT_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: cert-secret
+                  key: certSecret
                   name: {{ include "nr-oracle-service.name" . }}
             - name: DB_PORT
               value: "1543"
@@ -77,34 +77,34 @@ spec:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: db-password
+                  key: dbPassword
                   name: {{ include "nr-oracle-service.name" . }}
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  key: db-user
+                  key: dbUser
                   name: {{ include "nr-oracle-service.name" . }}
             - name: DB_NAME
               valueFrom:
                 secretKeyRef:
-                  key: db-name
+                  key: dbName
                   name: {{ include "nr-oracle-service.name" . }}
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  key: db-host
+                  key: dbHost
                   name: {{ include "nr-oracle-service.name" . }}
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
-                  key: api-key
+                  key: apiKey
                   name: {{ include "nr-oracle-service.name" . }}
             - name: DB_PORT
               value: '1543'
             - name: CERT_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: cert-secret
+                  key: certSecret
                   name: {{ include "nr-oracle-service.name" . }}
             - name: POOL_MIN_SIZE
               value: {{ required "A valid .Values.app.envs.POOL_MIN_SIZE entry required!" .Values.app.envs.POOL_MIN_SIZE  | quote }}
