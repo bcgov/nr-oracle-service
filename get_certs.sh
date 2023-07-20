@@ -11,7 +11,8 @@ if [ -z "$DB_PORT" ]; then
 fi
 cert_folder="/app/cert"
 cert_file="jssecacerts"
-
+certSecret=$CERT_SECRET
+echo "The certSecret is $certSecret"
 mkdir -p $cert_folder
 #The DB_SECRET is a secret that you have to set in the environment variables of the container, it is stored in github secrets and created manually and is not linked to the Database credentials.
 generate_cert() {
@@ -21,7 +22,7 @@ generate_cert() {
 
   openssl s_client -connect "${DB_HOST}:${DB_PORT}" -showcerts </dev/null | openssl x509 -outform pem >"$cert_folder/${DB_HOST}.pem"
   openssl x509 -outform der -in "$cert_folder/${DB_HOST}.pem" -out "$cert_folder/${DB_HOST}.der"
-  keytool -import -alias "${DB_HOST}" -keystore $cert_folder/$cert_file -file "$cert_folder/${DB_HOST}.der" -storepass "${CERT_SECRET}" -noprompt
+  keytool -import -alias "${DB_HOST}" -keystore $cert_folder/$cert_file -file "$cert_folder/${DB_HOST}.der" -storepass "${certSecret}" -noprompt
 
   echo "Generated $cert_file and copied it to $cert_folder."
 }
