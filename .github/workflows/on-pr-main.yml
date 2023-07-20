@@ -25,9 +25,11 @@ jobs:
           - package: nr-oracle-service
             build_file: Dockerfile
             build_context: .
+            triggers: ('src/' 'pom.xml')
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
+            triggers: ('get_certs.sh' 'Dockerfile.certs')
 
 
     steps:
@@ -40,6 +42,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
+          triggers: ${{ matrix.triggers }}
 
 
   deploys:
