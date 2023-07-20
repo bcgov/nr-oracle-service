@@ -35,7 +35,7 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}, ${{ github.event.pull_request.head.sha }}
+          tag: ${{ github.event.number }}
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
