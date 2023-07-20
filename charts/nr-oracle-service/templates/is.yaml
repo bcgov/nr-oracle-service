@@ -26,9 +26,9 @@ spec:
   lookupPolicy:
     local: false
   tags:
-    - name: "{{ .Values.image.initTag }}"
+    - name: "{{ .Values.image.tag }}"
       from:
         kind: DockerImage
-        name: "{{ .Values.image.repositoryInit }}:{{ .Values.image.initTag | default .Chart.AppVersion }}"
+        name: "{{ .Values.image.repositoryInit }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
       referencePolicy:
         type: Local
