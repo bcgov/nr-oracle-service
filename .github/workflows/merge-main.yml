@@ -1,13 +1,11 @@
 name: create helm chart on release
 
 on:
-  push:
-    paths:
-      - 'charts/**'
-    branches:
-      - main
   workflow_dispatch:
-
+  workflow_run:
+    workflows: ["Pull Request Closed"] # This is the workflow that will trigger this workflow as there is dependency between them
+    types:
+      - completed
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -41,6 +39,7 @@ jobs:
           tag_name: ${{ steps.changelog.outputs.tag }}
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
+
       - name: Tag Docker Images
         uses: shrink/actions-docker-registry-tag@v3
         if: ${{ steps.changelog.outputs.tag != '' }}
