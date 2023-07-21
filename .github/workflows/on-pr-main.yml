@@ -38,7 +38,6 @@ jobs:
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.sha }}
-          tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
