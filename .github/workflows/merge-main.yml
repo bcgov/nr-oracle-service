@@ -11,11 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pre-release:
+  release:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        package: [ nr-oracle-service, nr-oracle-service-init ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,30 +41,41 @@ jobs:
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
-      - name: Tag Docker Images
+      - name: Tag Docker Image for app container
         uses: shrink/actions-docker-registry-tag@v3
         if: ${{ steps.changelog.outputs.tag != '' }}
         with:
           registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
+          repository: ${{ github.repository }}/nr-oracle-service
           target: test
           tags: ${{ steps.changelog.outputs.tag }}
-
-  release-chart:
-    needs: pre-release
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      
+      - name: Tag Docker Image for init container
+        uses: shrink/actions-docker-registry-tag@v3
+        if: ${{ steps.changelog.outputs.tag != '' }}
         with:
-          fetch-depth: 0
+          registry: ghcr.io
+          repository: ${{ github.repository }}/nr-oracle-service-init
+          target: test
+          tags: ${{ steps.changelog.outputs.tag }}
+      
+      - name: Create Helm Package
+        if: ${{ steps.changelog.outputs.tag != '' }}
+        run: |
+          helm package charts/nr-oracle-service --app-version ${{ steps.changelog.outputs.tag }} --version ${{ steps.changelog.outputs.tag }}
 
       - name: Configure Git
+        if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
+  
       - name: Run chart-releaser
+        if: ${{ steps.changelog.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
+        with:
+          skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+
