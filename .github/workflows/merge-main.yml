@@ -27,6 +27,7 @@ jobs:
           output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
+          skip-on-empty: 'false'
           git-push: 'true'
 
       - name: Create Release
