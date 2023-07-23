@@ -63,7 +63,7 @@ jobs:
       - name: Create Helm Package
         if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
-          helm package charts/nr-oracle-service --app-version ${{ steps.changelog.outputs.tag }} --version ${{ steps.changelog.outputs.tag }}
+          helm package charts/nr-oracle-service --app-version ${{ steps.changelog.outputs.tag }} --version ${{ steps.changelog.outputs.tag }} --destination .cr-release-packages
 
       - name: Configure Git
         if: ${{ steps.changelog.outputs.tag != '' }}
