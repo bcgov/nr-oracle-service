@@ -1,32 +1,88 @@
 name: create helm chart on release
 
 on:
-  push:
-    paths:
-      - 'charts/**'
-    branches:
-      - main
   workflow_dispatch:
-
+  workflow_run:
+    workflows: ["Pull Request Closed"] # This is the workflow that will trigger this workflow as there is dependency between them
+    types:
+      - completed
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:
-  release-chart:
+  release:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        continue-on-error: true
+        with:
+          github-token: ${{ github.token }}
+          output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'true'
+          git-push: 'true'
+      - name: Extract Semver
+        id: extractSemver
+        run: |
+          #!/bin/bash
+          semver=$(echo "${{ steps.changelog.outputs.tag }}" | sed 's/v//')
+          echo "::set-output name=semver::$semver"
+        
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          token: ${{ github.token }}
+          tag_name: ${{ steps.extractSemver.outputs.semver }}
+          name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+
+      - name: Tag Docker Image for app container
+        uses: shrink/actions-docker-registry-tag@v3
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/nr-oracle-service
+          target: test
+          tags: ${{ steps.extractSemver.outputs.semver }}
+      
+      - name: Tag Docker Image for init container
+        uses: shrink/actions-docker-registry-tag@v3
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/nr-oracle-service-init
+          target: test
+          tags: ${{ steps.extractSemver.outputs.semver }}
+      
+      - name: Create Helm Package
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        run: |
+          helm package charts/nr-oracle-service --app-version ${{ steps.extractSemver.outputs.semver }} --version ${{ steps.extractSemver.outputs.semver }}
 
       - name: Configure Git
+        if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
+  
       - name: Run chart-releaser
+        if: ${{ steps.changelog.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
+        with:
+          skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+
