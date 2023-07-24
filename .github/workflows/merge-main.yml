@@ -76,8 +76,6 @@ jobs:
       - name: Run chart-releaser
         if: ${{ steps.tag.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
-        with:
-          skip_packaging: false
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
