@@ -27,14 +27,14 @@ jobs:
           output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
+          skip-on-empty: 'false'
           git-push: 'true'
-      
+
       - name: Extract Semver
         id: extractSemver
+        shell: bash
         run: |
-          #!/bin/bash
-          semver=$(echo "${{ steps.changelog.outputs.tag }}" | sed 's/v//')
-          echo "::set-output name=semver::$semver"
+          echo semver=${{ steps.changelog.outputs.tag }} | sed 's/v//' >> $GITHUB_OUTPUT
         
 
       - name: Create Release
@@ -85,3 +85,5 @@ jobs:
           skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+
