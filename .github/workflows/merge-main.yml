@@ -28,6 +28,7 @@ jobs:
           skip-version-file: 'true'
           skip-commit: 'true'
           git-push: 'true'
+      
       - name: Extract Semver
         id: extractSemver
         run: |
@@ -56,7 +57,7 @@ jobs:
           repository: ${{ github.repository }}/nr-oracle-service
           target: test
           tags: ${{ steps.extractSemver.outputs.semver }}
-      
+
       - name: Tag Docker Image for init container
         uses: shrink/actions-docker-registry-tag@v3
         if: ${{ steps.extractSemver.outputs.semver != '' }}
@@ -65,18 +66,18 @@ jobs:
           repository: ${{ github.repository }}/nr-oracle-service-init
           target: test
           tags: ${{ steps.extractSemver.outputs.semver }}
-      
+
       - name: Create Helm Package
         if: ${{ steps.extractSemver.outputs.semver != '' }}
         run: |
-          helm package charts/nr-oracle-service --app-version ${{ steps.extractSemver.outputs.semver }} --version ${{ steps.extractSemver.outputs.semver }}
+          helm package charts/nr-oracle-service --app-version ${{ steps.extractSemver.outputs.semver }} --version ${{ steps.extractSemver.outputs.semver }} --destination .cr-release-packages
 
       - name: Configure Git
         if: ${{ steps.changelog.outputs.tag != '' }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-  
+
       - name: Run chart-releaser
         if: ${{ steps.changelog.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
@@ -84,5 +85,3 @@ jobs:
           skip_packaging: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-
