@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
+  pre-release:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -66,15 +66,29 @@ jobs:
           repository: ${{ github.repository }}/nr-oracle-service-init
           target: test
           tags: ${{ steps.tag.outputs.tag }}
-
-      - name: Configure Git
+      - name: Update Chart.yaml
         if: ${{ steps.tag.outputs.tag != '' }}
+        run: |
+          cd charts/nr-oracle-service
+          sed -i "s/^appVersion:.*/appVersion: ${{ steps.tag.outputs.tag }}/g" Chart.yaml
+          git add Chart.yaml
+          git commit -m "Update appVersion to ${{ steps.tag.outputs.tag }}"
+          git push origin main
+  
+  release:
+    runs-on: ubuntu-22.04
+    needs: pre-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Run chart-releaser
-        if: ${{ steps.tag.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
