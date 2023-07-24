@@ -35,7 +35,10 @@ jobs:
         shell: bash
         run: |
           echo semver=${{ steps.changelog.outputs.tag }} | sed 's/v//' >> $GITHUB_OUTPUT
-        
+      
+      - name: Print Semver
+        run: |
+          echo "Semver: ${{ steps.extractSemver.outputs.semver }}"  
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -73,13 +76,13 @@ jobs:
           helm package charts/nr-oracle-service --app-version ${{ steps.extractSemver.outputs.semver }} --version ${{ steps.extractSemver.outputs.semver }} --destination .cr-release-packages
 
       - name: Configure Git
-        if: ${{ steps.changelog.outputs.tag != '' }}
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Run chart-releaser
-        if: ${{ steps.changelog.outputs.tag != '' }}
+        if: ${{ steps.extractSemver.outputs.semver != '' }}
         uses: helm/chart-releaser-action@v1.5.0
         with:
           skip_packaging: true
