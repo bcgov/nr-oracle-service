@@ -68,6 +68,8 @@ jobs:
           tags: ${{ steps.tag.outputs.tag }}
       - name: Update Chart.yaml
         if: ${{ steps.tag.outputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
             git checkout -b update-chart-${{ steps.tag.outputs.tag }}
             cd charts/nr-oracle-service
