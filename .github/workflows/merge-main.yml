@@ -30,59 +30,56 @@ jobs:
           skip-on-empty: 'false'
           git-push: 'true'
 
-      - name: Extract Semver
-        id: extractSemver
+      - name: Extract Tag
+        id: tag
         shell: bash
         run: |
-          echo semver=${{ steps.changelog.outputs.tag }} | sed 's/v//' >> $GITHUB_OUTPUT
+          echo tag=${{ steps.changelog.outputs.tag }} | sed 's/v//' >> $GITHUB_OUTPUT
       
-      - name: Print Semver
-        run: |
-          echo "Semver: ${{ steps.extractSemver.outputs.semver }}"  
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           token: ${{ github.token }}
-          tag_name: ${{ steps.extractSemver.outputs.semver }}
+          tag_name:  ${{ steps.changelog.outputs.tag }}
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
       - name: Tag Docker Image for app container
         uses: shrink/actions-docker-registry-tag@v3
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service
           target: test
-          tags: ${{ steps.extractSemver.outputs.semver }}
+          tags: ${{ steps.tag.outputs.tag }}
 
       - name: Tag Docker Image for init container
         uses: shrink/actions-docker-registry-tag@v3
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service-init
           target: test
-          tags: ${{ steps.extractSemver.outputs.semver }}
+          tags: ${{ steps.tag.outputs.tag }}
 
       - name: Create Helm Package
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         run: |
-          helm package charts/nr-oracle-service --app-version ${{ steps.extractSemver.outputs.semver }} --version ${{ steps.extractSemver.outputs.semver }} --destination .cr-release-packages
+          helm package charts/nr-oracle-service --app-version ${{ steps.tag.outputs.tag }} --version ${{ steps.tag.outputs.tag }} --destination .cr-release-packages
 
       - name: Configure Git
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Run chart-releaser
-        if: ${{ steps.extractSemver.outputs.semver != '' }}
+        if: ${{ steps.tag.outputs.tag != '' }}
         uses: helm/chart-releaser-action@v1.5.0
         with:
           skip_packaging: true
