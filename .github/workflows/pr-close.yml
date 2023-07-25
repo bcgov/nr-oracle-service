@@ -6,6 +6,8 @@ on:
       - main
     types:
       - closed
+    paths-ignore:
+      - 'charts/**'
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
