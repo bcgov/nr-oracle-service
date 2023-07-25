@@ -30,16 +30,9 @@ jobs:
           skip-on-empty: 'false'
           git-push: 'true'
 
-      - name: Extract Tag
-        id: tag
-        shell: bash
-        run: |
-          echo tag=${{ steps.changelog.outputs.tag }} | sed 's/v//' >> $GITHUB_OUTPUT
-      
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: ${{ steps.tag.outputs.tag != '' }}
+        if: ${{ steps.changelog.outputs.version != '' }}
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -51,34 +44,22 @@ jobs:
 
       - name: Tag Docker Image for app container
         uses: shrink/actions-docker-registry-tag@v3
-        if: ${{ steps.tag.outputs.tag != '' }}
+        if: ${{ steps.changelog.outputs.version != '' }}
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service
           target: test
-          tags: ${{ steps.tag.outputs.tag }}
+          tags: ${{ steps.changelog.outputs.version }}
 
       - name: Tag Docker Image for init container
         uses: shrink/actions-docker-registry-tag@v3
-        if: ${{ steps.tag.outputs.tag != '' }}
+        if: ${{ steps.changelog.outputs.version != '' }}
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service-init
           target: test
-          tags: ${{ steps.tag.outputs.tag }}
-      - name: Update Chart.yaml
-        if: ${{ steps.tag.outputs.tag != '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-            git checkout -b update-chart-${{ steps.tag.outputs.tag }}
-            cd charts/nr-oracle-service
-            sed -i "s/^appVersion:.*/appVersion: ${{ steps.tag.outputs.tag }}/g" Chart.yaml
-            git add Chart.yaml
-            git commit -m "Update appVersion to ${{ steps.tag.outputs.tag }}"
-            git push origin update-chart-${{ steps.tag.outputs.tag }}
-            gh pr create --title "Update appVersion to ${{ steps.tag.outputs.tag }}" --body "Update appVersion to ${{ steps.tag.outputs.tag }}" --base main --head update-chart-${{ steps.tag.outputs.tag }}
-            gh pr merge --auto --merge --delete-branch update-chart-${{ steps.tag.outputs.tag }}
+          tags: ${{ steps.changelog.outputs.version }}
+
   
   release:
     runs-on: ubuntu-22.04
@@ -97,5 +78,3 @@ jobs:
         uses: helm/chart-releaser-action@v1.5.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-
