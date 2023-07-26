@@ -23,7 +23,7 @@ Prerequisites:
 
 ## How
 
-- It is a single helm command to deploy to an openshift namespace.
+- It is a single helm command to deploy to an openshift namespace. The Helm Repo URL is https://bcgov.github.io/nr-oracle-service
 - Can deploy multiple instances of this API to the same namespace with different names for different Oracle PROXY
   accounts.
 - The API is secured with API Key.
