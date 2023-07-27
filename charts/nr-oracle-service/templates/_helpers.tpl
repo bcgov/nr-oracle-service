@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "nr-oracle-service.name" -}}
+{{- define "component.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "nr-oracle-service.fullname" -}}
+{{- define "component.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "nr-oracle-service.chart" -}}
+{{- define "component.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "nr-oracle-service.labels" -}}
-helm.sh/chart: {{ include "nr-oracle-service.chart" . }}
-{{ include "nr-oracle-service.selectorLabels" . }}
+{{- define "component.labels" -}}
+helm.sh/chart: {{ include "component.chart" . }}
+{{ include "component.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "nr-oracle-service.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "nr-oracle-service.name" . }}
+{{- define "component.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "component.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "nr-oracle-service.serviceAccountName" -}}
+{{- define "component.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "nr-oracle-service.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "component.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

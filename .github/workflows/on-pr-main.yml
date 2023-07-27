@@ -48,7 +48,7 @@ jobs:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
           target: ${{ github.sha }}
-          tags: ${{ github.event.number }}
+          tags: pr-${{ github.event.number }}
 
 
 
@@ -70,4 +70,4 @@ jobs:
           oc project ${{ vars.oc_namespace }}
           
           # Deploy Helm Chart
-          helm upgrade --install --wait --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }} --set image.repository=ghcr.io/${{ github.repository }}/nr-oracle-service --set image.repositoryInit=ghcr.io/${{ github.repository }}/nr-oracle-service-init --namespace  ${{ vars.oc_namespace }}  --timeout 10m charts/nr-oracle-service --debug
+          helm upgrade --install --wait --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=pr-${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }} --set image.repository=ghcr.io/${{ github.repository }}/nr-oracle-service --set image.repositoryInit=ghcr.io/${{ github.repository }}/nr-oracle-service-init --set namespace=${{ vars.oc_namespace }}  --timeout 10m charts/nr-oracle-service --debug

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ca.bc.gov.nrs.api</groupId>
   <artifactId>nr-oracle-service</artifactId>
-  <version>0.1.13</version>
+  <version>0.1.18</version>
   <properties>
     <compiler-plugin.version>3.11.0</compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
