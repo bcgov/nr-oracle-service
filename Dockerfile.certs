@@ -1,5 +1,5 @@
 #This Dockerfile mounts the certs
-FROM eclipse-temurin:17-jdk-alpine AS buildCert
+FROM eclipse-temurin:17.0.8_7-jdk-alpine AS buildCert
 
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
