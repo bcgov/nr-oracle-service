@@ -29,7 +29,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.fullname" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -56,7 +56,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.fullname" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
