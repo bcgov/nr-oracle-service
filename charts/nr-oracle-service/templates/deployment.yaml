@@ -3,14 +3,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "component.name" . }}
-  labels: 
+  labels:
     {{- include "component.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
-    matchLabels: 
+    matchLabels:
       {{- include "component.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -45,7 +45,10 @@ spec:
                   key: certSecret
                   name: {{ include "component.name" . }}
             - name: DB_PORT
-              value: "1543"
+              valueFrom:
+                secretKeyRef:
+                  key: dbPort
+                  name: {{ include "component.name" . }}
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
@@ -100,7 +103,10 @@ spec:
                   key: apiKey
                   name: {{ include "component.name" . }}
             - name: DB_PORT
-              value: '1543'
+              valueFrom:
+                secretKeyRef:
+                  key: dbPort
+                  name: {{ include "component.name" . }}
             - name: CERT_SECRET
               valueFrom:
                 secretKeyRef:
