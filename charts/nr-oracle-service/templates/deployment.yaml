@@ -72,6 +72,9 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "component.name" . }}
           env:
             - name: KUBERNETES_NAMESPACE
               valueFrom:
