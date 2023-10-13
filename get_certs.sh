@@ -11,6 +11,8 @@ if [ -z "$DB_PORT" ]; then
 fi
 cert_folder="/app/cert"
 cert_file="jssecacerts"
+echo "$CMAN_CERT"
+echo "$CMAN_CERT" >> $cert_folder/cman.crt
 certSecret=$CERT_SECRET
 echo "The certSecret is $certSecret"
 mkdir -p $cert_folder
@@ -20,9 +22,9 @@ generate_cert() {
   echo "I will try to get the ${DB_HOST}-1 cert"
   echo "Connecting to ${DB_HOST}:${DB_PORT}"
 
-  openssl s_client -connect "${DB_HOST}:${DB_PORT}" -showcerts </dev/null | openssl x509 -outform pem >"$cert_folder/${DB_HOST}.pem" || exit 1
-  openssl x509 -outform der -in "$cert_folder/${DB_HOST}.pem" -out "$cert_folder/${DB_HOST}.der" || exit 1
-  keytool -import -alias "${DB_HOST}" -keystore $cert_folder/$cert_file -file "$cert_folder/${DB_HOST}.der" -storepass "${certSecret}" -noprompt || exit 1
+  #openssl s_client -connect "${DB_HOST}:${DB_PORT}" -showcerts </dev/null | openssl x509 -outform pem >"$cert_folder/${DB_HOST}.pem" || exit 1
+  #openssl x509 -outform der -in "$cert_folder/${DB_HOST}.pem" -out "$cert_folder/${DB_HOST}.der" || exit 1
+  keytool -import -alias "${DB_HOST}" -keystore $cert_folder/$cert_file -file "$cert_folder/cman.crt" -storepass "${certSecret}" -noprompt || exit 1
 
   echo "Generated $cert_file and copied it to $cert_folder."
 }
