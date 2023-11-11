@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v1.3.0
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.sha }}
