@@ -62,6 +62,7 @@ jobs:
       project_name: nr-oracle
       app_name: nr-oracle-service
       environment: development
+      secret_path_env: dev # this path is different from the path in the broker
     steps:
       - uses: actions/checkout@v4
       - name: Broker
@@ -81,10 +82,10 @@ jobs:
           token: ${{ steps.broker.outputs.vault_token }}
           exportEnv: 'false'
           secrets: |
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
       - name: Deploy to OpenShift
         shell: bash
         run: |
