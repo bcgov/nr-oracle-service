@@ -1,4 +1,4 @@
-FROM quay.io/quarkus/ubi-quarkus-native-image:22.3.0-java17 AS build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
@@ -8,6 +8,7 @@ RUN chmod +x mvnw
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
 RUN ./mvnw package -Pnative -DskipTests
+#RUN ./mvnw package -DskipTests for JVM mode
 HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 FROM quay.io/quarkus/quarkus-micro-image:2.0
@@ -21,3 +22,24 @@ EXPOSE 3000
 USER 1001
 HEALTHCHECK --interval=300s --timeout=3s CMD curl -f http://localhost:3000/ || exit 1
 CMD ["./application", "-Dquarkus.http.host=0.0.0.0"]
+
+
+
+#
+#FROM registry.access.redhat.com/ubi8/openjdk-17:1.16
+
+#ENV LANGUAGE='en_US:en'
+
+
+# We make four distinct layers so if there are application changes the library layers can be re-used
+#COPY --chown=185 --from=build /code/target/quarkus-app/lib/ /deployments/lib/
+#COPY --chown=185 --from=build /code/target/quarkus-app/*.jar /deployments/
+#COPY --chown=185 --from=build /code/target/quarkus-app/app/ /deployments/app/
+#COPY --chown=185 --from=build /code/target/quarkus-app/quarkus/ /deployments/quarkus/
+
+#EXPOSE 8080
+#USER 185
+#ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+#ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
+#HEALTHCHECK --interval=300s --timeout=3s CMD curl -f http://localhost:3000/ || exit 1
+#ENTRYPOINT [ "/opt/jboss/container/java/run/run-java.sh" ]

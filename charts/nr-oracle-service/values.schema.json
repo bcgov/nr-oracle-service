@@ -192,10 +192,12 @@
               "type": "string",
               "default": "1"
             }
+
           },
           "required": [
             "DB_HOST", "DB_NAME", "DB_PASSWORD", "DB_USER"
-          ]
+          ],
+          "additionalProperties": true
         },
         "ports": {
           "type": "object",

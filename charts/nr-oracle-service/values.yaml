@@ -72,9 +72,11 @@ affinity: {}
 app:
   envs:
     DB_HOST: ~
+    DB_PORT: ~
     DB_NAME: ~
     DB_PASSWORD: ~
     DB_USER: ~
+    CMAN_CERT: ~
     HTTP_PORT: "3000"
     POOL_IDLE_TIMEOUT: "60000"
     POOL_INITIAL_SIZE: "1"
@@ -82,5 +84,6 @@ app:
     POOL_MAX_LIFETIME: "180000"
     POOL_MAX_SIZE: "1"
     POOL_MIN_SIZE: "1"
+    ACCESS_LOG_ENABLED: "false"
   ports:
     http: 3000

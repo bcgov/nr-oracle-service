@@ -57,8 +57,35 @@ jobs:
     needs:
       - builds
     runs-on: ubuntu-22.04
+    environment: test
+    env:
+      project_name: nr-oracle
+      app_name: nr-oracle-service
+      environment: development
+      secret_path_env: dev # this path is different from the path in the broker
     steps:
       - uses: actions/checkout@v4
+      - name: Broker
+        id: broker
+        uses: bcgov-nr/action-vault-broker-approle@v1.0.0
+        with:
+          broker_jwt: ${{ secrets.BROKER_JWT }}
+          provision_role_id: ${{ secrets.PROVISION_ROLE }}
+          project_name: ${{ env.project_name }}
+          app_name: ${{ env.app_name }}
+          environment: ${{ env.environment }}
+      - name: Import Secrets
+        id: secrets
+        uses: hashicorp/vault-action@v2.7.4
+        with:
+          url: https://vault-iit.apps.silver.devops.gov.bc.ca
+          token: ${{ steps.broker.outputs.vault_token }}
+          exportEnv: 'false'
+          secrets: |
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
+            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
       - name: Deploy to OpenShift
         shell: bash
         run: |
@@ -70,4 +97,14 @@ jobs:
           oc project ${{ vars.oc_namespace }}
           
           # Deploy Helm Chart
-          helm upgrade --install --wait --atomic nr-oracle-service-${{ github.event.number }}  --set nameOverride=nr-oracle-service-${{ github.event.number }} --set image.tag=pr-${{ github.event.number }} --set app.envs.DB_HOST=${{ secrets.DB_HOST }} --set app.envs.DB_NAME=${{ secrets.DB_NAME }} --set app.envs.DB_PASSWORD=${{ secrets.DB_PASSWORD }} --set app.envs.DB_USER=${{ secrets.DB_USER }} --set image.repository=ghcr.io/${{ github.repository }}/nr-oracle-service --set image.repositoryInit=ghcr.io/${{ github.repository }}/nr-oracle-service-init --set namespace=${{ vars.oc_namespace }}  --timeout 10m charts/nr-oracle-service --debug
+          helm upgrade --install nr-oracle-service-${{ github.event.number }} \
+          --set-string image.tag=${{ github.sha }} \
+          --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
+          --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
+          --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
+          --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
+          --set-string app.envs.DB_PORT="${{ secrets.DB_PORT }}" \
+          --set-string image.repository="ghcr.io/${{ github.repository }}/nr-oracle-service" \
+          --set-string image.repositoryInit="ghcr.io/${{ github.repository }}/nr-oracle-service-init" \
+          --set-string namespace=${{ vars.oc_namespace }}  \
+          --timeout 10m charts/nr-oracle-service

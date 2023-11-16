@@ -3,14 +3,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "component.name" . }}
-  labels: 
+  labels:
     {{- include "component.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
-    matchLabels: 
+    matchLabels:
       {{- include "component.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -29,7 +29,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.fullname" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -45,7 +45,7 @@ spec:
                   key: certSecret
                   name: {{ include "component.name" . }}
             - name: DB_PORT
-              value: "1543"
+              value: '1543'
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
@@ -53,7 +53,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.fullname" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -120,6 +120,8 @@ spec:
               value: {{ required "A valid .Values.app.envs.POOL_MAX_LIFETIME entry required!" .Values.app.envs.POOL_MAX_LIFETIME  | quote }}
             - name: POOL_LEAK_DETECTION_INTERVAL
               value: {{ required "A valid .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL entry required!" .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL  | quote }}
+            - name: ACCESS_LOG_ENABLED
+              value: {{ required "A valid .Values.app.envs.ACCESS_LOG_ENABLED entry required!" .Values.app.envs.ACCESS_LOG_ENABLED  | quote }}
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
