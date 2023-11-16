@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-    name: allow-apps-to-connect-to-{{ include "component.name" . }}
+    name: allow-apps-to-connect-to-{{ .Release.Name }}
     labels:
     {{- include "component.labels" . | nindent 6 }}
 spec:
