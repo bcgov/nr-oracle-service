@@ -72,9 +72,6 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          envFrom:
-            - configMapRef:
-                name: {{ include "component.name" . }}
           env:
             - name: KUBERNETES_NAMESPACE
               valueFrom:
@@ -106,10 +103,7 @@ spec:
                   key: apiKey
                   name: {{ include "component.name" . }}
             - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  key: dbPort
-                  name: {{ include "component.name" . }}
+              value: '1543'
             - name: CERT_SECRET
               valueFrom:
                 secretKeyRef:
