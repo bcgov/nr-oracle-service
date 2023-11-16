@@ -82,9 +82,9 @@ jobs:
           exportEnv: 'false'
           secrets: |
             apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}//rar dbName | DB_NAME;
+            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
             apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
-            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}//rar dbUser | DB_USER;
+            apps/data/${{ env.environment }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
       - name: Deploy to OpenShift
         shell: bash
         run: |
