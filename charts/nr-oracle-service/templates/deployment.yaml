@@ -120,6 +120,8 @@ spec:
               value: {{ required "A valid .Values.app.envs.POOL_MAX_LIFETIME entry required!" .Values.app.envs.POOL_MAX_LIFETIME  | quote }}
             - name: POOL_LEAK_DETECTION_INTERVAL
               value: {{ required "A valid .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL entry required!" .Values.app.envs.POOL_LEAK_DETECTION_INTERVAL  | quote }}
+            - name: ACCESS_LOG_ENABLED
+              value: {{ required "A valid .Values.app.envs.ACCESS_LOG_ENABLED entry required!" .Values.app.envs.ACCESS_LOG_ENABLED  | quote }}
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert

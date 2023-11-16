@@ -84,5 +84,6 @@ app:
     POOL_MAX_LIFETIME: "180000"
     POOL_MAX_SIZE: "1"
     POOL_MIN_SIZE: "1"
+    ACCESS_LOG_ENABLED: "false"
   ports:
     http: 3000
