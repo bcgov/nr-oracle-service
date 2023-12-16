@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.0
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.1
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.sha }}
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Broker
         id: broker
-        uses: bcgov-nr/action-vault-broker-approle@v1.0.0
+        uses: bcgov-nr/action-vault-broker-approle@v1.1.0
         with:
           broker_jwt: ${{ secrets.BROKER_JWT }}
           provision_role_id: ${{ secrets.PROVISION_ROLE }}
