@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v4
+        uses: TriPSs/conventional-changelog-action@v5
         id: changelog
         continue-on-error: true
         with:
