@@ -1,7 +1,15 @@
-name: semantic release
+name: Merge
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - 'charts/**'
+      - '!.github/workflows/merge.yml'
   workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
@@ -10,8 +18,7 @@ jobs:
   semantic-release:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Conventional Changelog Update
