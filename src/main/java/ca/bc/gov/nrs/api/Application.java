@@ -36,14 +36,21 @@ public class Application {
   }
 
   @POST
-  public Response executeSQL(@HeaderParam("X-API-Key") String xApiKey, @Valid Payload payload) throws SQLException {
+  public Response executeSQL(@HeaderParam("X-API-Key") String xApiKey, @QueryParam("uploadToS3") String uploadToS3,
+      @Valid Payload payload) throws SQLException {
     if (!apiKey.equals(xApiKey)) {
       return Response.status(Response.Status.UNAUTHORIZED).build();
     }
     if (payload.queryType() == QueryType.READ) {
-      return Response.ok(queryExecutorService.executeQuery(payload.sql())).build();
+      var result = queryExecutorService.executeQuery(payload.sql());
+      if (uploadToS3 != null) {
+        // TODO add upload to S3
+        // queryExecutorService.uploadToS3(result);
+      }
+      return Response.ok(result).build();
     }
     queryExecutorService.mutateState(payload.sql());
     return Response.ok().build();
   }
+
 }

@@ -35,18 +35,11 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.1
         with:
           package: ${{ matrix.package }}
-          tag: ${{ github.sha }}
+          tag: ${{ github.event.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
-
-      - uses: shrink/actions-docker-registry-tag@v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.sha }}
-          tags: pr-${{ github.event.number }}
 
 
 
@@ -78,31 +71,41 @@ jobs:
         with:
           url: https://vault-iit.apps.silver.devops.gov.bc.ca
           token: ${{ steps.broker.outputs.vault_token }}
-          exportEnv: 'false'
+          exportEnv: 'true'
           secrets: |
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
-      - name: Deploy to OpenShift
+
+
+      - name: Deploy to Openshift
+        working-directory: charts/nr-oracle-service
         shell: bash
         run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
-          
-          # Login to OpenShift (NOTE: project command is a safeguard)
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-          
+          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
+          # uninstall if found
+          helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }} || true
+
           # Deploy Helm Chart
-          helm upgrade --install nr-oracle-service-${{ github.event.number }} \
-          --set-string image.tag=${{ github.sha }} \
-          --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
-          --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
-          --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
-          --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
-          --set-string app.envs.DB_PORT="${{ secrets.DB_PORT }}" \
-          --set-string image.repository="ghcr.io/${{ github.repository }}/nr-oracle-service" \
-          --set-string image.repositoryInit="ghcr.io/${{ github.repository }}/nr-oracle-service-init" \
-          --set-string namespace=${{ vars.oc_namespace }}  \
-          --timeout 10m charts/nr-oracle-service
+          helm dependency update
+          helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
+          
+          helm upgrade \
+            --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
+            --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
+            --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
+            --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
+            --set-string app.envs.DB_PORT="1543" \
+            --set-string image.tag="${{ github.event.number }}" \
+            --set-string namespace=${{ vars.oc_namespace }}  \
+            --install --wait --atomic  ${{ github.event.repository.name }}-${{ github.event.number }} \
+            --values values.yaml \
+            ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
+
+          # print history 
+          helm history ${{ github.event.repository.name }}-${{ github.event.number }}
+          
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded

@@ -17,6 +17,8 @@ jobs:
   # Clean up OpenShift when PR closed, no conditions
   cleanup-openshift:
     name: Cleanup OpenShift
+    env:
+      release: ${{ github.event.repository.name }}-${{ github.event.number }}
     runs-on: ubuntu-22.04
     steps:
       - name: Remove OpenShift artifacts
@@ -24,8 +26,9 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
 
-          # Remove old build runs, build pods and deployment pods
-          helm uninstall nr-oracle-service-${{ github.event.number }}
+          # If found, then remove
+          helm status ${{ env.release }} && helm uninstall --no-hooks ${{ env.release }} || \
+            echo "Not found: ${{ env.release }}"
 
   # If merged into main, then handle any image promotions
   image-promotions:
@@ -42,5 +45,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: pr-${{ github.event.number }}
+          target: ${{ github.event.number }}
           tags: test

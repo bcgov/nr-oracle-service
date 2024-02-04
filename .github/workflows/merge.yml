@@ -15,8 +15,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps: # Get PR number for squash merges to main
+      -
+        name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
   semantic-release:
     runs-on: ubuntu-22.04
+    needs: [vars]
+    outputs:
+      tag: ${{ steps.changelog.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,7 +65,7 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service
-          target: test
+          target: ${{ needs.vars.outputs.pr }}
           tags: ${{ steps.changelog.outputs.version }}
 
       - name: Tag Docker Image for init container
@@ -60,7 +74,30 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/nr-oracle-service-init
-          target: test
+          target: ${{ needs.vars.outputs.pr }}
           tags: ${{ steps.changelog.outputs.version }}
-
+  helm-release:
+    runs-on: ubuntu-22.04
+    needs: [semantic-release]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: package helm chart
+        shell: bash
+        working-directory: charts/${{ github.event.repository.name }}
+        run: |
+          helm dependency update
+          helm package --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.tag }} .
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          skip_packaging: 'true'
 
