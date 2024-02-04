@@ -49,11 +49,6 @@ jobs:
       - builds
     runs-on: ubuntu-22.04
     environment: test
-    outputs:
-      DB_HOST: ${{ steps.secrets.outputs.DB_HOST }}
-      DB_NAME: ${{ steps.secrets.outputs.DB_NAME }}
-      DB_PWD: ${{ steps.secrets.outputs.DB_PWD }}
-      DB_USER: ${{ steps.secrets.outputs.DB_USER }}
     env:
       project_name: nr-oracle
       app_name: nr-oracle-service
@@ -76,7 +71,7 @@ jobs:
         with:
           url: https://vault-iit.apps.silver.devops.gov.bc.ca
           token: ${{ steps.broker.outputs.vault_token }}
-          exportEnv: 'false'
+          exportEnv: 'true'
           secrets: |
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
@@ -89,8 +84,8 @@ jobs:
     needs: [secrets]
     secrets: inherit
     with:
-      DB_HOST: ${{ needs.secrets.outputs.DB_HOST }}
-      DB_NAME: ${{ needs.secrets.outputs.DB_NAME }}
-      DB_PWD: ${{ needs.secrets.outputs.DB_PWD }}
-      DB_USER: ${{ needs.secrets.outputs.DB_USER }}
+      DB_HOST: ${{ env.DB_HOST }}
+      DB_NAME: ${{ env.DB_NAME }}
+      DB_PWD: ${{ env.DB_PWD }}
+      DB_USER: ${{ env.DB_USER }}
       release: ${{ github.event.number }}
