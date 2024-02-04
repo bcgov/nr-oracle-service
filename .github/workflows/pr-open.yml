@@ -101,7 +101,7 @@ jobs:
             --set-string image.tag="${{ github.event.number }}" \
             --set-string namespace=${{ vars.oc_namespace }}  \
             --install --wait --atomic  ${{ github.event.repository.name }}-${{ github.event.number }} \
-            --values ${{ inputs.values }} \
+            --values values.yaml \
             ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
 
           # print history 
