@@ -43,8 +43,8 @@ jobs:
 
 
 
-  secrets:
-    name: Fetch Secrets
+  deploys:
+    name: Deploys
     needs:
       - builds
     runs-on: ubuntu-22.04
@@ -79,7 +79,7 @@ jobs:
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
 
 
-      - name: Deploy
+      - name: Deploy to Openshift
         working-directory: charts/nr-oracle-service
         shell: bash
         run: |
