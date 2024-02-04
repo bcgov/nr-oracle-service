@@ -5,8 +5,6 @@ on:
     types: [closed]
     paths-ignore:
       - '*.md'
-      - '.github/**'
-      - 'charts/**'
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
