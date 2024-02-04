@@ -5,9 +5,6 @@ on:
     branches: [main]
     paths-ignore:
       - '*.md'
-      - '.github/**'
-      - 'charts/**'
-      - '!.github/workflows/merge.yml'
   workflow_dispatch:
 
 concurrency:
@@ -22,8 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps: # Get PR number for squash merges to main
-      -
-        name: PR Number
+      - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
   semantic-release:
