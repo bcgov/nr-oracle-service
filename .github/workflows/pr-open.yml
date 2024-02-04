@@ -35,18 +35,11 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.1
         with:
           package: ${{ matrix.package }}
-          tag: ${{ github.sha }}
+          tag: ${{ github.event.number }}
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
-
-      - uses: shrink/actions-docker-registry-tag@v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ github.sha }}
-          tags: pr-${{ github.event.number }}
 
 
 
@@ -85,24 +78,10 @@ jobs:
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
       - name: Deploy to OpenShift
-        shell: bash
-        run: |
-          # Allow pipefail, since we could be catching oc create errors
-          set +o pipefail
-          
-          # Login to OpenShift (NOTE: project command is a safeguard)
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.oc_namespace }}
-          
-          # Deploy Helm Chart
-          helm upgrade --install nr-oracle-service-${{ github.event.number }} \
-          --set-string image.tag=${{ github.sha }} \
-          --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
-          --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
-          --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
-          --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
-          --set-string app.envs.DB_PORT="${{ secrets.DB_PORT }}" \
-          --set-string image.repository="ghcr.io/${{ github.repository }}/nr-oracle-service" \
-          --set-string image.repositoryInit="ghcr.io/${{ github.repository }}/nr-oracle-service-init" \
-          --set-string namespace=${{ vars.oc_namespace }}  \
-          --timeout 10m charts/nr-oracle-service
+        uses: ./.github/workflows/.deploy.yml
+        with:
+          DB_HOST: ${{ steps.secrets.outputs.DB_HOST }}
+          DB_NAME: ${{ steps.secrets.outputs.DB_NAME }}
+          DB_PWD: ${{ steps.secrets.outputs.DB_PWD }}
+          DB_USER: ${{ steps.secrets.outputs.DB_USER }}
+          DB_PORT: ${{ secrets.DB_PORT }}
