@@ -43,12 +43,17 @@ jobs:
 
 
 
-  deploys:
-    name: Deploys
+  secrets:
+    name: Fetch Secrets
     needs:
       - builds
     runs-on: ubuntu-22.04
     environment: test
+    outputs:
+      DB_HOST: ${{ steps.secrets.outputs.DB_HOST }}
+      DB_NAME: ${{ steps.secrets.outputs.DB_NAME }}
+      DB_PWD: ${{ steps.secrets.outputs.DB_PWD }}
+      DB_USER: ${{ steps.secrets.outputs.DB_USER }}
     env:
       project_name: nr-oracle
       app_name: nr-oracle-service
@@ -77,11 +82,15 @@ jobs:
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
-      - name: Deploy to OpenShift
-        uses: ./.github/workflows/.deploy.yml
-        with:
-          DB_HOST: ${{ steps.secrets.outputs.DB_HOST }}
-          DB_NAME: ${{ steps.secrets.outputs.DB_NAME }}
-          DB_PWD: ${{ steps.secrets.outputs.DB_PWD }}
-          DB_USER: ${{ steps.secrets.outputs.DB_USER }}
-          DB_PORT: ${{ secrets.DB_PORT }}
+
+  deploys:
+    name: Deploys
+    uses: ./.github/workflows/.deploy.yml
+    needs: [secrets]
+    secrets: inherit
+    with:
+      DB_HOST: ${{ steps.secrets.outputs.DB_HOST }}
+      DB_NAME: ${{ steps.secrets.outputs.DB_NAME }}
+      DB_PWD: ${{ steps.secrets.outputs.DB_PWD }}
+      DB_USER: ${{ steps.secrets.outputs.DB_USER }}
+      DB_PORT: ${{ secrets.DB_PORT }}
