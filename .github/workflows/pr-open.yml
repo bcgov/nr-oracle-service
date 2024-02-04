@@ -78,14 +78,34 @@ jobs:
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
             apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
 
-  deploys:
-    name: Deploys
-    uses: ./.github/workflows/.deploy.yml
-    needs: [secrets]
-    secrets: inherit
-    with:
-      DB_HOST: ${{ env.DB_HOST }}
-      DB_NAME: ${{ env.DB_NAME }}
-      DB_PWD: ${{ env.DB_PWD }}
-      DB_USER: ${{ env.DB_USER }}
-      release: ${{ github.event.number }}
+
+      - name: Deploy
+        working-directory: charts/nr-oracle-service
+        shell: bash
+        run: |
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
+          # uninstall if found
+          helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }} || true
+
+          # Deploy Helm Chart
+          helm dependency update
+          helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
+          
+          helm upgrade \
+            --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
+            --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
+            --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
+            --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
+            --set-string app.envs.DB_PORT="1543" \
+            --set-string image.tag="${{ github.event.number }}" \
+            --set-string namespace=${{ vars.oc_namespace }}  \
+            --install --wait --atomic  ${{ github.event.repository.name }}-${{ github.event.number }} \
+            --values ${{ inputs.values }} \
+            ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
+
+          # print history 
+          helm history ${{ github.event.repository.name }}-${{ github.event.number }}
+          
+          # Remove old build runs, build pods and deployment pods
+          oc delete po --field-selector=status.phase==Succeeded
