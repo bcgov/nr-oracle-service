@@ -100,4 +100,5 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           skip_packaging: 'true'
+          package-path: charts/${{ github.event.repository.name }}
 
