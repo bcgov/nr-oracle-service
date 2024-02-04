@@ -67,8 +67,8 @@ on:
         type: string
       DB_PORT:
         description: 'Database Port'
-        default: ''
-        required: true
+        default: '1543'
+        required: false
         type: string
       params:
         description: 'Extra parameters to pass to helm upgrade'

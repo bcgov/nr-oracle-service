@@ -93,4 +93,3 @@ jobs:
       DB_NAME: ${{ needs.secrets.outputs.DB_NAME }}
       DB_PWD: ${{ needs.secrets.outputs.DB_PWD }}
       DB_USER: ${{ needs.secrets.outputs.DB_USER }}
-      DB_PORT: ${{ secrets.DB_PORT }}
