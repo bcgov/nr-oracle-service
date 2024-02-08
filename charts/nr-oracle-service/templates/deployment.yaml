@@ -27,6 +27,7 @@ spec:
             claimName: {{ include "component.name" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.global.tcpsEnabled }}
       initContainers:
         - name: {{ .Chart.Name }}-init
           image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -49,6 +50,7 @@ spec:
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -99,6 +101,10 @@ spec:
                 secretKeyRef:
                   key: apiKey
                   name: {{ include "component.name" . }}
+            {{- if not .Values.global.tcpsEnabled }}
+            - name: JDBC_URL
+              value: {{ required "A valid .Values.app.envs.JDBC_URL entry required!" .Values.app.envs.JDBC_URL  | quote }}
+            {{- end }}
             - name: DB_PORT
               value: '1543'
             - name: CERT_SECRET

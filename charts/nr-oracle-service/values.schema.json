@@ -191,6 +191,9 @@
             "POOL_MIN_SIZE": {
               "type": "string",
               "default": "1"
+            },
+            "JDBC_URL": {
+              "type": "string"
             }
 
           },

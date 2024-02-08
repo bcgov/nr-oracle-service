@@ -4,7 +4,8 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
+global:
+  tcpsEnabled: true
 image:
   repository: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service
   repositoryInit: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service-init
@@ -85,5 +86,6 @@ app:
     POOL_MAX_SIZE: "1"
     POOL_MIN_SIZE: "1"
     ACCESS_LOG_ENABLED: "false"
+    JDBC_URL: ~
   ports:
     http: 3000
