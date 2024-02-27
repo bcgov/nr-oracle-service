@@ -56,29 +56,7 @@ jobs:
       secret_path_env: dev # this path is different from the path in the broker
     steps:
       - uses: actions/checkout@v4
-      - name: Broker
-        id: broker
-        uses: bcgov-nr/action-vault-broker-approle@v1.1.0
-        with:
-          broker_jwt: ${{ secrets.BROKER_JWT }}
-          provision_role_id: ${{ secrets.PROVISION_ROLE }}
-          project_name: ${{ env.project_name }}
-          app_name: ${{ env.app_name }}
-          environment: ${{ env.environment }}
-      - name: Import Secrets
-        id: secrets
-        uses: hashicorp/vault-action@v2.7.5
-        with:
-          url: https://vault-iit.apps.silver.devops.gov.bc.ca
-          token: ${{ steps.broker.outputs.vault_token }}
-          exportEnv: 'true'
-          secrets: |
-            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbHost | DB_HOST;
-            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbName | DB_NAME;
-            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbPassword | DB_PWD;
-            apps/data/${{ env.secret_path_env }}/${{ env.project_name }}/${{ env.app_name }}/rar dbUser | DB_USER;
-
-
+      
       - name: Deploy to Openshift
         working-directory: charts/nr-oracle-service
         shell: bash
@@ -93,10 +71,10 @@ jobs:
           helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
           
           helm upgrade \
-            --set-string app.envs.DB_HOST=${{ steps.secrets.outputs.DB_HOST }} \
-            --set-string app.envs.DB_NAME=${{ steps.secrets.outputs.DB_NAME }} \
-            --set-string app.envs.DB_PASSWORD=${{ steps.secrets.outputs.DB_PWD }} \
-            --set-string app.envs.DB_USER=${{ steps.secrets.outputs.DB_USER }} \
+            --set-string app.envs.DB_HOST=${{ secrets.DB_HOST }} \
+            --set-string app.envs.DB_NAME=${{ secrets.DB_NAME }} \
+            --set-string app.envs.DB_PASSWORD=${{ secrets.DB_PWD }} \
+            --set-string app.envs.DB_USER=${{ secrets.DB_USER }} \
             --set-string app.envs.DB_PORT="1543" \
             --set-string image.tag="${{ github.event.number }}" \
             --set-string namespace=${{ vars.oc_namespace }}  \
