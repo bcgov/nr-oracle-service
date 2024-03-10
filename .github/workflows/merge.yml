@@ -44,7 +44,7 @@ jobs:
           git-push: 'true'
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ steps.changelog.outputs.version != '' }}
         continue-on-error: true
         env:
