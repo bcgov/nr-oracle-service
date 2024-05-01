@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths-ignore:
       - '*.md'
+      - '.github/**'
+      - '.github/graphics/**'
+      - '!.github/workflows/**'
+      - 'renovate.json'
+      - 'target/**'
   workflow_dispatch:
 
 concurrency:
