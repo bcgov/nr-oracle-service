@@ -32,6 +32,7 @@ jobs:
     needs: [vars]
     outputs:
       tag: ${{ steps.changelog.outputs.tag }}
+      version: ${{ steps.changelog.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,6 +81,7 @@ jobs:
   helm-release:
     runs-on: ubuntu-22.04
     needs: [semantic-release]
+    if: ${{ needs.semantic-release.outputs.version != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -92,7 +94,7 @@ jobs:
       - name: package helm chart
         shell: bash
         run: |
-          helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.tag }} charts/${{ github.event.repository.name }}
+          helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.version }} charts/${{ github.event.repository.name }}
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         env:
