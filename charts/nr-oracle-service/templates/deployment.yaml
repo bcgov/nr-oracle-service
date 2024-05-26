@@ -61,12 +61,27 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
+            timeoutSeconds: 5
+            periodSeconds: 30
+            initialDelaySeconds: 20
+            failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
+            timeoutSeconds: 5
+            periodSeconds: 10
+            initialDelaySeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
