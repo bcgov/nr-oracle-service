@@ -27,6 +27,7 @@ public class Application {
   }
 
   @GET
+  @Path("health")
   public Response healthCheck() {
     var result = queryExecutorService.healthCheck();
     if (result == 0) {
