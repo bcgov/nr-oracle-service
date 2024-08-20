@@ -44,10 +44,6 @@ public class Application {
     }
     if (payload.queryType() == QueryType.READ) {
       var result = queryExecutorService.executeQuery(payload.sql());
-      if (uploadToS3 != null) {
-        // TODO add upload to S3
-        // queryExecutorService.uploadToS3(result);
-      }
       return Response.ok(result).build();
     }
     queryExecutorService.mutateState(payload.sql());
