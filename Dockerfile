@@ -1,4 +1,6 @@
 FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+# Receiving app version
+ARG APP_VERSION=0.0.1
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
@@ -7,6 +9,10 @@ WORKDIR /code
 RUN chmod +x mvnw
 RUN ./mvnw -B org.apache.maven.plugins:maven-dependency-plugin:3.1.2:go-offline
 COPY src /code/src
+
+RUN ./mvnw versions:set -DnewVersion=${APP_VERSION} -f pom.xml -DskipTests -Dtests.skip=true -Dskip.unit.tests=true && \
+    ./mvnw versions:commit -f pom.xml -DskipTests -Dtests.skip=true -Dskip.unit.tests=true \
+
 RUN ./mvnw package -Pnative -DskipTests
 #RUN ./mvnw package -DskipTests for JVM mode
 HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
