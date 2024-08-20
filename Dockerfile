@@ -17,7 +17,7 @@ RUN ./mvnw package -Pnative -DskipTests
 #RUN ./mvnw package -DskipTests for JVM mode
 HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
-FROM quay.io/quarkus/quarkus-micro-image:2.0
+FROM quay.io/quarkus/quarkus-micro-image:2.0 as deploy
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \

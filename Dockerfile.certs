@@ -1,9 +1,9 @@
 #This Dockerfile mounts the certs
-FROM eclipse-temurin:21.0.4_7-jdk-alpine AS buildCert
+FROM eclipse-temurin:21.0.4_7-jdk-alpine AS build-cert
 
-ENV LANG en_CA.UTF-8
-ENV LANGUAGE en_CA.UTF-8
-ENV LC_ALL en_CA.UTF-8
+ENV LANG=en_CA.UTF-8
+ENV LANGUAGE=en_CA.UTF-8
+ENV LC_ALL=en_CA.UTF-8
 WORKDIR /app
 
 RUN apk --no-cache add openssl

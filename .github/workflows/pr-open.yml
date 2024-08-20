@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+      - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
@@ -57,7 +57,7 @@ jobs:
       secret_path_env: dev # this path is different from the path in the broker
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Deploy to Openshift
         working-directory: charts/nr-oracle-service
         shell: bash
