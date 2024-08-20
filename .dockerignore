@@ -6,3 +6,6 @@ target/quarkus-app/*
 .idea/*
 .github/*
 charts/*
+.quarkus
+.vscode/*
+oracle-data
