@@ -84,16 +84,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+      - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         with:
           package: ${{ matrix.package }}
-          tag: ${{ needs.semantic-release.outputs.tag }}
+          tag: ${{ needs.semantic-release.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
           build_args: |
-            APP_VERSION=${{ needs.semantic-release.outputs.tag }}
+            APP_VERSION=${{ needs.semantic-release.outputs.version }}
   helm-release:
     runs-on: ubuntu-22.04
     needs: [builds,semantic-release]
