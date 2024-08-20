@@ -40,7 +40,8 @@ jobs:
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
-
+          build_args: |
+            APP_VERSION=${{ github.event.number }}
 
 
   deploys:
