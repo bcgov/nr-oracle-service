@@ -29,7 +29,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}-init:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "artifacts.developer.gov.bc.ca/github-docker-remote/bcgov/nr-oracle-service/nr-oracle-service-init:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -53,7 +53,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "image-registry.openshift-image-registry.svc:5000/{{.Release.Namespace}}/{{ include "component.name" . }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "artifacts.developer.gov.bc.ca/github-docker-remote/bcgov/nr-oracle-service/nr-oracle-service:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -61,12 +61,27 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
+            timeoutSeconds: 5
+            periodSeconds: 30
+            initialDelaySeconds: 20
+            failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
+            timeoutSeconds: 5
+            periodSeconds: 10
+            initialDelaySeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            timeoutSeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

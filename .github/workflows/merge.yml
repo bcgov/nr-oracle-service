@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths-ignore:
       - '*.md'
+      - '.github/**'
+      - '.github/graphics/**'
+      - '!.github/workflows/**'
+      - 'renovate.json'
+      - 'target/**'
   workflow_dispatch:
 
 concurrency:
@@ -27,6 +32,7 @@ jobs:
     needs: [vars]
     outputs:
       tag: ${{ steps.changelog.outputs.tag }}
+      version: ${{ steps.changelog.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +50,7 @@ jobs:
           git-push: 'true'
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ steps.changelog.outputs.version != '' }}
         continue-on-error: true
         env:
@@ -75,6 +81,7 @@ jobs:
   helm-release:
     runs-on: ubuntu-22.04
     needs: [semantic-release]
+    if: ${{ needs.semantic-release.outputs.version != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -87,9 +94,9 @@ jobs:
       - name: package helm chart
         shell: bash
         run: |
-          helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.tag }} charts/${{ github.event.repository.name }}
+          helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.version }} charts/${{ github.event.repository.name }}
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@v1.6.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:

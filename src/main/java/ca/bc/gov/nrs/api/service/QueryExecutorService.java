@@ -36,21 +36,22 @@ public class QueryExecutorService {
     try (var connection = dataSource.getConnection()) {
       connection.setReadOnly(true);
       try (var statement = connection.prepareStatement(query)) {
-        var result = statement.executeQuery();
-        var metaData = result.getMetaData();
-        List<String> columnNames = new ArrayList<>();
-        for (int i = 1; i <= metaData.getColumnCount(); i++) {
-          String columnName = metaData.getColumnName(i);
-          columnNames.add(columnName);
-        }
-        while (result.next()) {
-          Map<String, Object> row = new HashMap<>();
-          for (int i = 0; i < metaData.getColumnCount(); i++) {
-            String columnName = columnNames.get(i);
-            Object columnValue = result.getObject(i + 1);
-            row.put(columnName, columnValue);
+        try(var result = statement.executeQuery()){
+          var metaData = result.getMetaData();
+          List<String> columnNames = new ArrayList<>();
+          for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            String columnName = metaData.getColumnName(i);
+            columnNames.add(columnName);
           }
-          results.add(row);
+          while (result.next()) {
+            Map<String, Object> row = new HashMap<>();
+            for (int i = 0; i < metaData.getColumnCount(); i++) {
+              String columnName = columnNames.get(i);
+              Object columnValue = result.getObject(i + 1);
+              row.put(columnName, columnValue);
+            }
+            results.add(row);
+          }
         }
       }
     } catch (Exception e) {
