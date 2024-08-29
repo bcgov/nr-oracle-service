@@ -24,12 +24,12 @@ HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 ###
 
-FROM quay.io/quarkus/quarkus-micro-image:2.0 as deploy
+FROM quay.io/quarkus/quarkus-micro-image:2.0 AS deploy
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
     && chown 1001:root /work
-COPY --chown=1001:root --from=build /code/target/*-runner /work/application#
+COPY --chown=1001:root --from=build /code/target/*-runner /work/application
 
 EXPOSE 3000
 USER 1001
