@@ -13,8 +13,11 @@ COPY src /code/src
 RUN ./mvnw versions:set -DnewVersion=${APP_VERSION} -f pom.xml -DskipTests -Dtests.skip=true -Dskip.unit.tests=true && \
     ./mvnw versions:commit -f pom.xml -DskipTests -Dtests.skip=true -Dskip.unit.tests=true
 
+### NATIVE BUILD
 #RUN ./mvnw package -Pnative -DskipTests
-RUN ./mvnw package -DskipTests for JVM mode
+
+### JVM BUILD
+RUN ./mvnw package -DskipTests
 HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 ###
