@@ -21,14 +21,14 @@ jobs:
     name: Set Variables
     outputs:
       pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps: # Get PR number for squash merges to main
       - name: PR Number
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
   semantic-release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [vars]
     outputs:
       tag: ${{ steps.changelog.outputs.tag }}
@@ -38,7 +38,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v5
+        uses: TriPSs/conventional-changelog-action@v6
         id: changelog
         continue-on-error: true
         with:
@@ -65,7 +65,7 @@ jobs:
   builds:
     name: Builds
     needs: semantic-release
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     strategy:
@@ -95,7 +95,7 @@ jobs:
           build_args: |
             APP_VERSION=${{ needs.semantic-release.outputs.version }}
   helm-release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [builds,semantic-release]
     if: ${{ needs.semantic-release.outputs.version != '' }}
     steps:
