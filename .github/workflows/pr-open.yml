@@ -13,7 +13,7 @@ jobs:
   builds:
     name: Builds
     if: '!github.event.pull_request.head.repo.fork'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       packages: write
     strategy:
@@ -48,7 +48,7 @@ jobs:
     name: Deploys
     needs:
       - builds
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     environment: test
     env:
       project_name: nr-oracle
@@ -56,6 +56,11 @@ jobs:
       environment: development
       secret_path_env: dev # this path is different from the path in the broker
     steps:
+      - name: Install CLI tools from OpenShift Mirror
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          oc: "4.14.37"
+
       - uses: actions/checkout@v4
 
       - name: Deploy to Openshift
