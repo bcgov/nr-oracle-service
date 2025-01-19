@@ -26,7 +26,7 @@ jobs:
     steps: # Get PR number for squash merges to main
       - name: PR Number
         id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
+        uses: bcgov/action-get-pr@v0.0.1
   semantic-release:
     runs-on: ubuntu-latest
     needs: [vars]
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.3.0
+      - uses: bcgov/action-builder-ghcr@v2.3.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ needs.semantic-release.outputs.version }}
