@@ -13,7 +13,7 @@ jobs:
   builds:
     name: Builds
     if: '!github.event.pull_request.head.repo.fork'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     strategy:
@@ -48,7 +48,7 @@ jobs:
     name: Deploys
     needs:
       - builds
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: test
     env:
       project_name: nr-oracle
