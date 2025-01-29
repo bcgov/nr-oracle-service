@@ -51,7 +51,7 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
-        if: ${{ steps.changelog.outputs.version != '' }}
+        if: steps.changelog.outputs.version != ''
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -97,7 +97,7 @@ jobs:
   helm-release:
     runs-on: ubuntu-24.04
     needs: [builds,semantic-release]
-    if: ${{ needs.semantic-release.outputs.version != '' }}
+    if: needs.semantic-release.outputs.version != ''
     steps:
       - name: Checkout
         uses: actions/checkout@v4
