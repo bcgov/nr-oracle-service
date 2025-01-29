@@ -112,7 +112,7 @@ jobs:
         run: |
           helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.version }} charts/${{ github.event.repository.name }}
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+        uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
