@@ -26,7 +26,7 @@ jobs:
     steps: # Get PR number for squash merges to main
       - name: PR Number
         id: pr
-        uses: bcgov/action-get-pr@v0.0.1
+        uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
   semantic-release:
     runs-on: ubuntu-24.04
     needs: [vars]
@@ -34,11 +34,11 @@ jobs:
       tag: ${{ steps.changelog.outputs.tag }}
       version: ${{ steps.changelog.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - name: Conventional Changelog Update
-        uses: TriPSs/conventional-changelog-action@v6
+        uses: TriPSs/conventional-changelog-action@67139193614f5b9e8db87da1bd4240922b34d765 # v6
         id: changelog
         continue-on-error: true
         with:
@@ -50,7 +50,7 @@ jobs:
           git-push: 'true'
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2
         if: steps.changelog.outputs.version != ''
         continue-on-error: true
         env:
@@ -83,8 +83,8 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: bcgov/action-builder-ghcr@v2.3.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: bcgov/action-builder-ghcr@ace71f7a527ca6fc43c15c7806314be5a4579d2c # v2.3.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ needs.semantic-release.outputs.version }}
@@ -100,7 +100,7 @@ jobs:
     if: needs.semantic-release.outputs.version != ''
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
       - name: Configure Git
@@ -112,7 +112,7 @@ jobs:
         run: |
           helm package -u --destination=.cr-release-packages --app-version="${{ needs.semantic-release.outputs.tag }}" --version=${{ needs.semantic-release.outputs.version }} charts/${{ github.event.repository.name }}
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:

@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@v1
+        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
         with:
           oc: "4.14.37"
 
@@ -44,7 +44,7 @@ jobs:
       matrix:
         package: [nr-oracle-service, nr-oracle-service-init]
     steps:
-      - uses: shrink/actions-docker-registry-tag@v4
+      - uses: shrink/actions-docker-registry-tag@f04afd0559f66b288586792eb150f45136a927fa # v4
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
