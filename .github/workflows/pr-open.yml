@@ -31,8 +31,8 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: bcgov/action-builder-ghcr@v2.3.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: bcgov/action-builder-ghcr@ace71f7a527ca6fc43c15c7806314be5a4579d2c # v2.3.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
@@ -57,11 +57,11 @@ jobs:
       secret_path_env: dev # this path is different from the path in the broker
     steps:
       - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@v1
+        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
         with:
           oc: "4.14.37"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Deploy to Openshift
         working-directory: charts/nr-oracle-service
