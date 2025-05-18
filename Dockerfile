@@ -24,7 +24,7 @@ HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 ###
 
-FROM quay.io/quarkus/quarkus-micro-image:2.0@sha256:8439095bcd7a0ead18db87d2fc17bdc9b9a62df07ddeb65590b09f92d79bcadb AS deploy
+FROM quay.io/quarkus/quarkus-micro-image:2.0@sha256:ec55f7e85b02c74a152a7474105e142a4c719184bf79aa19f743aec10e2b6cc1 AS deploy
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
