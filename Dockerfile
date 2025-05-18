@@ -1,4 +1,4 @@
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21@sha256:072fd4c80effec44ef93bbf3dff04df972fa82a51f98bd4bee9b37b33793dce0 AS build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21@sha256:9fb64b9bcbb527ca8f53ea65baaae9f9ad7706b096a3c5cc171872ac89162875 AS build
 # Receiving app version
 ARG APP_VERSION=0.0.1
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
