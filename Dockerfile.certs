@@ -1,5 +1,5 @@
 #This Dockerfile mounts the certs
-FROM eclipse-temurin:21.0.7_6-jdk-alpine@sha256:2f2f553ce09d25e2d2f0f521ab94cd73f70c9b21327a29149c23a2b63b8e29a0 AS build-cert
+FROM eclipse-temurin:21.0.7_6-jdk-alpine AS build-cert
 
 ENV LANG=en_CA.UTF-8
 ENV LANGUAGE=en_CA.UTF-8
