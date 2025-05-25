@@ -1,4 +1,4 @@
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21@sha256:9fb64b9bcbb527ca8f53ea65baaae9f9ad7706b096a3c5cc171872ac89162875 AS build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
 # Receiving app version
 ARG APP_VERSION=0.0.1
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
@@ -24,7 +24,7 @@ HEALTHCHECK --interval=300s --timeout=30s CMD ./mvnw --version  || exit 1
 ###
 ###
 
-FROM quay.io/quarkus/quarkus-micro-image:2.0@sha256:ec55f7e85b02c74a152a7474105e142a4c719184bf79aa19f743aec10e2b6cc1 AS deploy
+FROM quay.io/quarkus/quarkus-micro-image:2.0 AS deploy
 WORKDIR /work/
 RUN chown 1001 /work \
     && chmod "g+rwX" /work \
