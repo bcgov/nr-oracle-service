@@ -9,6 +9,8 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   builds:
     name: Builds
@@ -28,26 +30,19 @@ jobs:
             build_file: Dockerfile.certs
             build_context: .
             triggers: ('get_certs.sh' 'Dockerfile.certs')
-
-
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@v4
       - uses: bcgov/action-builder-ghcr@ace71f7a527ca6fc43c15c7806314be5a4579d2c # v2.3.0
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
-          token: ${{ secrets.GITHUB_TOKEN }}
           build_file: ${{ matrix.build_file }}
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
-          build_args: |
-            APP_VERSION=${{ github.event.number }}
-
 
   deploys:
     name: Deploys
-    needs:
-      - builds
+    needs: [builds]
     runs-on: ubuntu-24.04
     environment: test
     env:
