@@ -98,9 +98,11 @@ jobs:
             APP_VERSION=${{ needs.semantic-release.outputs.version }}
 
   helm-release:
-    runs-on: ubuntu-24.04
-    needs: [builds,semantic-release]
     if: needs.semantic-release.outputs.version != ''
+    needs: [builds,semantic-release]
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
