@@ -16,6 +16,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   vars:
     name: Set Variables
@@ -27,9 +29,12 @@ jobs:
       - name: PR Number
         id: pr
         uses: bcgov/action-get-pr@21f9351425cd55a98e869ee28919a512aa30647d # v0.0.1
+
   semantic-release:
     runs-on: ubuntu-24.04
     needs: [vars]
+    permissions:
+      contents: write
     outputs:
       tag: ${{ steps.changelog.outputs.tag }}
       version: ${{ steps.changelog.outputs.version }}
@@ -61,7 +66,6 @@ jobs:
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
-
   builds:
     name: Builds
     needs: semantic-release
@@ -80,10 +84,8 @@ jobs:
             build_file: Dockerfile.certs
             build_context: .
             triggers: ('get_certs.sh' 'Dockerfile.certs')
-
-
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@v4
       - uses: bcgov/action-builder-ghcr@ace71f7a527ca6fc43c15c7806314be5a4579d2c # v2.3.0
         with:
           package: ${{ matrix.package }}
@@ -94,13 +96,14 @@ jobs:
           triggers: ${{ matrix.triggers }}
           build_args: |
             APP_VERSION=${{ needs.semantic-release.outputs.version }}
+
   helm-release:
     runs-on: ubuntu-24.04
     needs: [builds,semantic-release]
     if: needs.semantic-release.outputs.version != ''
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Configure Git
