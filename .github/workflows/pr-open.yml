@@ -31,7 +31,7 @@ jobs:
             build_context: .
             triggers: ('get_certs.sh' 'Dockerfile.certs')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: bcgov/action-builder-ghcr@fd17bc1cbb16a60514e0df3966d42dff9fc232bc # v4.0.0
         with:
           package: ${{ matrix.package }}
@@ -56,7 +56,7 @@ jobs:
         with:
           oc: "4.14.37"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Deploy to Openshift
         working-directory: charts/nr-oracle-service
