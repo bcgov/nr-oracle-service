@@ -6,7 +6,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service
+  repository: ghcr.io/bcgov/nr-oracle-service
   repositoryInit: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service-init
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
@@ -31,12 +31,15 @@ podAnnotations: {}
 podSecurityContext: {}
 # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 # runAsUser: 1000
 
 service:
@@ -64,6 +67,8 @@ nodeSelector: {}
 
 tolerations: []
 
+# Pod anti-affinity (spread across nodes) is always applied by the chart.
+# Set affinity.nodeAffinity here to add node-pool / zone scheduling constraints.
 affinity: {}
 
 app:

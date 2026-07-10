@@ -1,0 +1,31 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(actions)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(maven)"
+    labels:
+      - "dependencies"
+      - "maven"
+    # This service is hard-pinned to JDK 21 (Oracle DB connectivity + RSA 1024
+    # key support the app relies on). Quarkus major bumps are the point where
+    # the minimum JDK requirement changes, so only those need manual review;
+    # minor/patch stay on auto-update.
+    ignore:
+      - dependency-name: "io.quarkus.platform:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "io.quarkus:*"
+        update-types: ["version-update:semver-major"]

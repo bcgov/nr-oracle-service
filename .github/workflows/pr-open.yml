@@ -12,9 +12,28 @@ concurrency:
 permissions: {}
 
 jobs:
+  pr-greeting:
+    name: PR Greeting
+    if: "!github.event.pull_request.head.repo.fork"
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: PR Greeting
+        uses: bcgov/actions/pr-description-add@0992e41cd11c5370b77f9e6066effe63efe9f8c9 # v0.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
+            Thanks for the PR!
+
+            This PR deploys to namespace `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
+
+            Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
+
   builds:
     name: Builds
-    if: '!github.event.pull_request.head.repo.fork'
+    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-24.04
     permissions:
       packages: write
@@ -31,8 +50,8 @@ jobs:
             build_context: .
             triggers: ('get_certs.sh' 'Dockerfile.certs')
     steps:
-      - uses: actions/checkout@v5
-      - uses: bcgov/action-builder-ghcr@fd17bc1cbb16a60514e0df3966d42dff9fc232bc # v4.0.0
+      - uses: actions/checkout@v7
+      - uses: bcgov/actions/builder-ghcr@0992e41cd11c5370b77f9e6066effe63efe9f8c9 # v0.4.0
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
@@ -49,42 +68,47 @@ jobs:
       project_name: nr-oracle
       app_name: nr-oracle-service
       environment: development
-      secret_path_env: dev # this path is different from the path in the broker
     steps:
-      - name: Install CLI tools from OpenShift Mirror
-        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82 # v1
-        with:
-          oc: "4.14.37"
-
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Deploy to Openshift
-        working-directory: charts/nr-oracle-service
-        shell: bash
-        run: |
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
-          # uninstall if found
-          helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }} || true
+        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.oc_server }}
+          oc_token: ${{ secrets.oc_token }}
+          commands: |
+            cd charts/nr-oracle-service
 
-          # Deploy Helm Chart
-          helm dependency update
-          helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
-          
-          helm upgrade \
-            --set-string app.envs.DB_HOST=${{ secrets.DB_HOST }} \
-            --set-string app.envs.DB_NAME=${{ secrets.DB_NAME }} \
-            --set-string app.envs.DB_PASSWORD=${{ secrets.DB_PWD }} \
-            --set-string app.envs.DB_USER=${{ secrets.DB_USER }} \
-            --set-string app.envs.DB_PORT="1543" \
-            --set-string image.tag="${{ github.event.number }}" \
-            --set-string namespace=${{ vars.oc_namespace }}  \
-            --install --wait --atomic  ${{ github.event.repository.name }}-${{ github.event.number }} \
-            --values values.yaml \
-            ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
+            # uninstall if found
+            helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }} || true
 
-          # print history 
-          helm history ${{ github.event.repository.name }}-${{ github.event.number }}
-          
-          # Remove old build runs, build pods and deployment pods
-          oc delete po --field-selector=status.phase==Succeeded
+            # Deploy Helm Chart
+            helm dependency update
+            helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
+
+            helm upgrade \
+              --set-string app.envs.DB_HOST=${{ secrets.DB_HOST }} \
+              --set-string app.envs.DB_NAME=${{ secrets.DB_NAME }} \
+              --set-string app.envs.DB_PASSWORD=${{ secrets.DB_PWD }} \
+              --set-string app.envs.DB_USER=${{ secrets.DB_USER }} \
+              --set-string app.envs.DB_PORT="1543" \
+              --set-string image.tag="${{ github.event.number }}" \
+              --set-string namespace=${{ vars.oc_namespace }}  \
+              --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} \
+              --values values.yaml \
+              ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
+
+            # print history
+            helm history ${{ github.event.repository.name }}-${{ github.event.number }}
+
+  results:
+    name: Results
+    if: always()
+    needs: [builds, deploys]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Fail if any dependent job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

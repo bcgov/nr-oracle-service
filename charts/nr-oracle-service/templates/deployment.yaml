@@ -21,16 +21,44 @@ spec:
       labels:
         {{- include "component.selectorLabels" . | nindent 8 }}
     spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    {{- include "component.selectorLabels" . | nindent 20 }}
+        {{- with .Values.affinity.nodeAffinity }}
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: {{ include "component.name" . }}
           persistentVolumeClaim:
             claimName: {{ include "component.name" . }}
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: {{ .Chart.Name }}-init
           image: "artifacts.developer.gov.bc.ca/github-docker-remote/bcgov/nr-oracle-service/nr-oracle-service-init:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
@@ -49,11 +77,13 @@ spec:
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "artifacts.developer.gov.bc.ca/github-docker-remote/bcgov/nr-oracle-service/nr-oracle-service:{{ .Values.image.tag | default .Chart.Version }}"
+          image: "artifacts.developer.gov.bc.ca/github-docker-remote/bcgov/nr-oracle-service:{{ .Values.image.tag | default .Chart.Version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -140,3 +170,5 @@ spec:
           volumeMounts:
             - name: {{ include "component.name" . }}
               mountPath: /app/cert
+            - name: tmp
+              mountPath: /tmp
