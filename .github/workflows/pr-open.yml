@@ -95,7 +95,7 @@ jobs:
               --set-string app.envs.DB_PORT="1543" \
               --set-string image.tag="${{ github.event.number }}" \
               --set-string namespace=${{ vars.oc_namespace }}  \
-              --install --wait --atomic  ${{ github.event.repository.name }}-${{ github.event.number }} \
+              --install ${{ github.event.repository.name }}-${{ github.event.number }} \
               --values values.yaml \
               ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
 
