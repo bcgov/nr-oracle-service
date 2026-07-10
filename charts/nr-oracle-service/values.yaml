@@ -6,7 +6,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service
+  repository: ghcr.io/bcgov/nr-oracle-service
   repositoryInit: ghcr.io/bcgov/nr-oracle-service/nr-oracle-service-init
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
