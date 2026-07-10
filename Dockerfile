@@ -1,4 +1,4 @@
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-25 AS build
 # Receiving app version
 ARG APP_VERSION=0.0.1
 
