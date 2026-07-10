@@ -95,15 +95,12 @@ jobs:
               --set-string app.envs.DB_PORT="1543" \
               --set-string image.tag="${{ github.event.number }}" \
               --set-string namespace=${{ vars.oc_namespace }}  \
-              --install ${{ github.event.repository.name }}-${{ github.event.number }} \
+              --install --wait --atomic ${{ github.event.repository.name }}-${{ github.event.number }} \
               --values values.yaml \
               ./${{ github.event.repository.name }}-${{ github.event.number }}.tgz
 
             # print history
             helm history ${{ github.event.repository.name }}-${{ github.event.number }}
-
-            # Remove old build runs, build pods and deployment pods
-            oc delete po --field-selector=status.phase==Succeeded
 
   results:
     name: Results
