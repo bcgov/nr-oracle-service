@@ -1,6 +1,14 @@
 FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21 AS build
 # Receiving app version
 ARG APP_VERSION=0.0.1
+
+# RELAX SECURITY: enable legacy TLS versions/algorithms (e.g. TLS 1.0/1.1, SHA1, DH/RSA keys < 2048)
+# so the native image can complete a handshake with nrkdb11.bcgov's legacy 1024-bit RSA cert.
+# GraalVM native-image bakes the JDK security providers into the binary at build time, so this
+# must be patched here (pre-compile) rather than via a runtime java.security override.
+USER root
+RUN sed -i '/^jdk.tls.disabledAlgorithms=/,/[^\\]$/c\jdk.tls.disabledAlgorithms=SSLv3' "$JAVA_HOME/conf/security/java.security"
+
 COPY --chown=quarkus:quarkus mvnw /code/mvnw
 COPY --chown=quarkus:quarkus .mvn /code/.mvn
 COPY --chown=quarkus:quarkus pom.xml /code/
