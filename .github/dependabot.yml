@@ -10,6 +10,10 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: "maven"
     directory: "/"
@@ -20,12 +24,10 @@ updates:
     labels:
       - "dependencies"
       - "maven"
-    # This service is hard-pinned to JDK 21 (Oracle DB connectivity + RSA 1024
-    # key support the app relies on). Quarkus major bumps are the point where
-    # the minimum JDK requirement changes, so only those need manual review;
-    # minor/patch stay on auto-update.
-    ignore:
-      - dependency-name: "io.quarkus.platform:*"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "io.quarkus:*"
-        update-types: ["version-update:semver-major"]
+    groups:
+      # Majors stay ungrouped (one PR each) so they get individual review;
+      # minor/patch bumps are low-risk and get bundled to cut PR noise.
+      maven-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"

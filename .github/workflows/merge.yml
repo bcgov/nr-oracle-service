@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '*.md'
-      - '.github/**'
-      - '.github/graphics/**'
-      - '!.github/workflows/**'
-      - 'target/**'
+      - "*.md"
+      - ".github/**"
+      - ".github/graphics/**"
+      - "!.github/workflows/**"
+      - "target/**"
   workflow_dispatch:
 
 concurrency:
@@ -47,11 +47,11 @@ jobs:
         continue-on-error: true
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          skip-on-empty: 'false'
-          git-push: 'true'
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          skip-on-empty: "false"
+          git-push: "true"
 
       - name: Create Release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           token: ${{ github.token }}
-          tag_name:  ${{ steps.changelog.outputs.tag }}
+          tag_name: ${{ steps.changelog.outputs.tag }}
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
@@ -73,7 +73,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [ nr-oracle-service, nr-oracle-service-init ]
+        package: [nr-oracle-service, nr-oracle-service-init]
         include:
           - package: nr-oracle-service
             build_file: Dockerfile
@@ -97,7 +97,7 @@ jobs:
 
   helm-release:
     if: needs.semantic-release.outputs.version != ''
-    needs: [builds,semantic-release]
+    needs: [builds, semantic-release]
     permissions:
       contents: write
     runs-on: ubuntu-24.04
@@ -121,5 +121,5 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          skip_packaging: 'true'
-
+          skip_packaging: "true"
+          skip_existing: "true"
