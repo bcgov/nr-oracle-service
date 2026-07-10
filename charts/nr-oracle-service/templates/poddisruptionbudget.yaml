@@ -1,0 +1,14 @@
+{{- if or .Values.autoscaling.enabled (gt (.Values.replicaCount | int) 1) }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "component.name" . }}
+  labels:
+    {{- include "component.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "component.selectorLabels" . | nindent 6 }}
+{{- end }}

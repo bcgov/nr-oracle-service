@@ -42,3 +42,6 @@ nb-configuration.xml
 # Plugin directory
 /.quarkus/cli/plugins/
 cman_certificate.crt
+.claude
+.copilot-memory
+.tokensave

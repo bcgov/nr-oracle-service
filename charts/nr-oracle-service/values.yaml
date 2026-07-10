@@ -31,12 +31,15 @@ podAnnotations: {}
 podSecurityContext: {}
 # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 # runAsUser: 1000
 
 service:
@@ -64,6 +67,8 @@ nodeSelector: {}
 
 tolerations: []
 
+# Pod anti-affinity (spread across nodes) is always applied by the chart.
+# Set affinity.nodeAffinity here to add node-pool / zone scheduling constraints.
 affinity: {}
 
 app:
