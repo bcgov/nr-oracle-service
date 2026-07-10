@@ -12,21 +12,28 @@ concurrency:
 permissions: {}
 
 jobs:
-  fork-gate:
-    name: Fork Gate
+  pr-greeting:
+    name: PR Greeting
+    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
+    permissions:
+      pull-requests: write
     steps:
-      - name: Fail on fork PRs
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          set -euo pipefail
-          echo "PRs from forks are not built automatically; a maintainer must re-land this from an in-repo branch." >&2
-          exit 1
+      - name: PR Greeting
+        uses: bcgov/actions/pr-description-add@0992e41cd11c5370b77f9e6066effe63efe9f8c9 # v0.4.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
+            Thanks for the PR!
+
+            This PR deploys to namespace `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
+
+            Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
 
   builds:
     name: Builds
-    needs: [fork-gate]
+    if: "!github.event.pull_request.head.repo.fork"
     runs-on: ubuntu-24.04
     permissions:
       packages: write
@@ -101,7 +108,7 @@ jobs:
   results:
     name: Results
     if: always()
-    needs: [fork-gate, builds, deploys]
+    needs: [builds, deploys]
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
