@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov/actions/pr-description-add@da76e0da09b8a8ceef61486208cdac75dac616c6 # v0.6.0
+        uses: bcgov/actions/pr-description-add@9f9c481afcfd97314f0b994222ef602ef8fbe2bd # post-#219 main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
@@ -44,14 +44,18 @@ jobs:
           - package: nr-oracle-service
             build_file: Dockerfile
             build_context: .
-            triggers: ('src/' 'pom.xml')
+            triggers: |
+              src/
+              pom.xml
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
-            triggers: ('get_certs.sh' 'Dockerfile.certs')
+            triggers: |
+              get_certs.sh
+              Dockerfile.certs
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder-ghcr@da76e0da09b8a8ceef61486208cdac75dac616c6 # v0.6.0
+      - uses: bcgov/actions/builder@9f9c481afcfd97314f0b994222ef602ef8fbe2bd # post-#219 main
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
@@ -59,9 +63,30 @@ jobs:
           build_context: ${{ matrix.build_context }}
           triggers: ${{ matrix.triggers }}
 
+  track:
+    name: Resolve Images
+    needs: [builds]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
+    outputs:
+      digest: ${{ steps.tracker.outputs.digest }}
+      digests: ${{ steps.tracker.outputs.digests }}
+      images: ${{ steps.tracker.outputs.images }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Resolve Images
+        id: tracker
+        uses: bcgov/actions/image-tracker@9f9c481afcfd97314f0b994222ef602ef8fbe2bd # post-#219 main
+        with:
+          package: nr-oracle-service, nr-oracle-service-init
+          # PR HEAD was just built; default max_depth 1 is enough
+
   deploys:
     name: Deploys
-    needs: [builds]
+    needs: [builds, track]
     runs-on: ubuntu-24.04
     environment: test
     env:
@@ -83,7 +108,7 @@ jobs:
             # uninstall if found
             helm uninstall ${{ github.event.repository.name }}-${{ github.event.number }} || true
 
-            # Deploy Helm Chart
+            # Deploy Helm Chart (tag stays PR# — chart concatenates repo:tag, not @digest)
             helm dependency update
             helm package --app-version="${{ github.event.number }}" --version=${{ github.event.number }} .
 
@@ -105,7 +130,7 @@ jobs:
   results:
     name: Results
     if: always()
-    needs: [builds, deploys]
+    needs: [builds, track, deploys]
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:

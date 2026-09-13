@@ -21,13 +21,25 @@ jobs:
   vars:
     name: Set Variables
     outputs:
-      pr: ${{ steps.pr.outputs.pr }}
+      pr: ${{ steps.tracker.outputs.pr }}
+      digest: ${{ steps.tracker.outputs.digest }}
+      digests: ${{ steps.tracker.outputs.digests }}
+      images: ${{ steps.tracker.outputs.images }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps: # Get PR number for squash merges to main
-      - name: PR Number
-        id: pr
-        uses: bcgov/actions/get-pr@da76e0da09b8a8ceef61486208cdac75dac616c6 # v0.6.0
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+      # Resolve PR + digests for squash merges to main (ADR-009)
+      - name: Resolve Images & PR
+        id: tracker
+        uses: bcgov/actions/image-tracker@9f9c481afcfd97314f0b994222ef602ef8fbe2bd # post-#219 main
+        with:
+          package: nr-oracle-service, nr-oracle-service-init
+          max_depth: 100
 
   semantic-release:
     runs-on: ubuntu-24.04
@@ -78,14 +90,18 @@ jobs:
           - package: nr-oracle-service
             build_file: Dockerfile
             build_context: .
-            triggers: ('src/' 'pom.xml')
+            triggers: |
+              src/
+              pom.xml
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
-            triggers: ('get_certs.sh' 'Dockerfile.certs')
+            triggers: |
+              get_certs.sh
+              Dockerfile.certs
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder-ghcr@da76e0da09b8a8ceef61486208cdac75dac616c6 # v0.6.0
+      - uses: bcgov/actions/builder@9f9c481afcfd97314f0b994222ef602ef8fbe2bd # post-#219 main
         with:
           package: ${{ matrix.package }}
           tags: ${{ needs.semantic-release.outputs.version }}
