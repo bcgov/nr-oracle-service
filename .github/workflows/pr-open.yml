@@ -22,7 +22,6 @@ jobs:
       - name: PR Greeting
         uses: bcgov/actions/pr-description-add@v0.6.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
             ---
             Thanks for the PR!
