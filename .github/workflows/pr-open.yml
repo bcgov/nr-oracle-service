@@ -12,24 +12,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  pr-greeting:
-    name: PR Greeting
-    if: "!github.event.pull_request.head.repo.fork"
-    runs-on: ubuntu-24.04
-    permissions:
-      pull-requests: write
-    steps:
-      - name: PR Greeting
-        uses: bcgov/actions/pr-description-add@v0.6.0
-        with:
-          add_markdown: |
-            ---
-            Thanks for the PR!
-
-            This PR deploys to namespace `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
-
-            Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
-
   builds:
     name: Builds
     if: "!github.event.pull_request.head.repo.fork"
@@ -50,7 +32,7 @@ jobs:
             triggers: ('get_certs.sh' 'Dockerfile.certs')
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder-ghcr@da76e0da09b8a8ceef61486208cdac75dac616c6 # v0.6.0
+      - uses: bcgov/actions/builder@ac9d89eede94f5f58d3446784c94cff634d98eac # v0.6.0
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
@@ -101,10 +83,27 @@ jobs:
             # print history
             helm history ${{ github.event.repository.name }}-${{ github.event.number }}
 
+  comment:
+    name: Deployment Links
+    needs: [deploys]
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Sticky PR Comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: pr-deployment-links
+          message: |
+            ### 🚀 Deployment Available
+            Deployed to `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
+
+            Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
+
   results:
     name: Results
     if: always()
-    needs: [builds, deploys]
+    needs: [builds, deploys, comment]
     runs-on: ubuntu-24.04
     timeout-minutes: 1
     steps:
