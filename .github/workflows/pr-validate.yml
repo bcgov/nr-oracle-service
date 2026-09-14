@@ -1,0 +1,31 @@
+name: PR Validate
+
+on:
+  pull_request:
+    types: [edited, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-edit-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  validate:
+    name: Validate PR
+    if: (! github.event.pull_request.draft)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: bcgov/actions/pr-validate@ac9d89eede94f5f58d3446784c94cff634d98eac # v0.6.0
+        with:
+          add_markdown: |
+            ---
+
+            Thanks for the PR!
+
+            This PR deploys to namespace `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
+
+            Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
