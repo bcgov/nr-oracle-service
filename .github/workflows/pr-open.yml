@@ -32,7 +32,7 @@ jobs:
             triggers: ('get_certs.sh' 'Dockerfile.certs')
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder@6763b12e9c5e7548fe0e63a63e16fe01f0f33b91 # v0.7.0
+      - uses: bcgov/actions/builder@c4694d429e6c8025974ba383f6f26ff8a41f7755 # v0.7.1
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
