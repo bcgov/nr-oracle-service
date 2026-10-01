@@ -2,6 +2,18 @@ apiVersion: v1
 entries:
   nr-oracle-service:
   - apiVersion: v2
+    appVersion: v0.8.45
+    created: "2026-10-01T00:16:54.689838263Z"
+    description: A Helm chart for Kubernetes to deploy the nr-oracle-service which
+      uses Quarkus API to connect to Oracle DB over encrypted connection.
+    digest: f11101457ca2ccf07f298d12a6371091e138c67ee233d62d77513402af272c4e
+    icon: https://raw.githubusercontent.com/bcgov/nr-oracle-service/main/charts/nr-oracle-service/.github/graphics/helm_logo.png
+    name: nr-oracle-service
+    type: application
+    urls:
+    - https://github.com/bcgov/nr-oracle-service/releases/download/nr-oracle-service-0.8.45/nr-oracle-service-0.8.45.tgz
+    version: 0.8.45
+  - apiVersion: v2
     appVersion: v0.8.44
     created: "2026-09-29T13:00:04.728782642Z"
     description: A Helm chart for Kubernetes to deploy the nr-oracle-service which
@@ -865,4 +877,4 @@ entries:
     urls:
     - https://github.com/bcgov/nr-oracle-service/releases/download/nr-oracle-service-0.0.2/nr-oracle-service-0.0.2.tgz
     version: 0.0.2
-generated: "2026-09-29T13:00:04.729110536Z"
+generated: "2026-10-01T00:16:54.690106905Z"
