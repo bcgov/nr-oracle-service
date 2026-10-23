@@ -11,7 +11,7 @@
       "properties": {
         "repository": {
           "type": "string",
-          "default": "ghcr.io/bcgov/nr-oracle-service/nr-oracle-service"
+          "default": "ghcr.io/bcgov/nr-oracle-service"
         },
         "repositoryInit": {
           "type": "string",

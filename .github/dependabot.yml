@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "deps(actions)"
+      prefix: "chore(deps)"
     labels:
       - "dependencies"
       - "github-actions"
@@ -20,7 +20,7 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "deps(maven)"
+      prefix: "chore(deps)"
     labels:
       - "dependencies"
       - "maven"
