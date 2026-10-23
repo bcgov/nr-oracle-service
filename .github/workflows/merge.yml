@@ -66,11 +66,15 @@ jobs:
           - package: nr-oracle-service
             build_file: Dockerfile
             build_context: .
-            triggers: ('src/' 'pom.xml')
+            triggers: |
+              src/
+              pom.xml
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
-            triggers: ('get_certs.sh' 'Dockerfile.certs')
+            triggers: |
+              get_certs.sh
+              Dockerfile.certs
     steps:
       - uses: actions/checkout@v7
       - uses: bcgov/actions/builder@79aefe3a7abb2d0d00b1b3ea4cfbf12727a10638 # v0.9.0
