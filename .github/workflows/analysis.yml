@@ -47,6 +47,8 @@ jobs:
           scan-type: "fs"
           scanners: "vuln,secret,misconfig"
           severity: "CRITICAL"
+          # Without this, SARIF output ignores severity and exit-code trips on any finding
+          limit-severities-for-sarif: true
           exit-code: "1"
           cache-dir: .trivycache
 
