@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>bcgov/renovate-config#2026.9.26"
+  ],
+  "packageRules": [
+    {
+      "description": "chart-releaser v1.6+ breaks skip_packaging (unbound latest_tag, helm/chart-releaser-action#171); stay on v1.5.0",
+      "matchPackageNames": ["helm/chart-releaser-action"],
+      "enabled": false
+    }
   ]
 }
