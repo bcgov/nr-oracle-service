@@ -12,6 +12,20 @@ concurrency:
 permissions: {}
 
 jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+      - run: ./mvnw -B verify
+
   builds:
     name: Builds
     if: "!github.event.pull_request.head.repo.fork"
@@ -90,7 +104,7 @@ jobs:
   results:
     name: Results
     if: always()
-    needs: [builds, deploys]
+    needs: [tests, builds, deploys]
     runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
