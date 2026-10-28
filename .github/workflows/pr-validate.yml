@@ -29,3 +29,14 @@ jobs:
             This PR deploys to namespace `${{ vars.OC_NAMESPACE }}` as release `${{ github.event.repository.name }}-${{ github.event.number }}`.
 
             Once merged, code will be promoted via the [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml).
+
+  results:
+    name: Validate Results
+    needs: [validate]
+    if: always()
+    runs-on: ubuntu-26.04
+    timeout-minutes: 1
+    steps:
+      - uses: bcgov/actions/workflow-results@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
+        with:
+          needs: ${{ toJson(needs) }}

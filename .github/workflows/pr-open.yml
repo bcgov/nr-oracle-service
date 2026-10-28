@@ -102,12 +102,12 @@ jobs:
             helm history ${{ github.event.repository.name }}-${{ github.event.number }}
 
   results:
-    name: Results
-    if: always()
+    name: PR Results
     needs: [tests, builds, deploys]
+    if: always()
     runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
-      - name: Fail if any dependent job failed or was cancelled
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
-        run: exit 1
+      - uses: bcgov/actions/workflow-results@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
+        with:
+          needs: ${{ toJson(needs) }}
