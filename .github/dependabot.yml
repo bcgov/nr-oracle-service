@@ -14,6 +14,9 @@ updates:
       github-actions:
         patterns:
           - "*"
+    ignore:
+      # v1.6+ breaks skip_packaging (helm/chart-releaser-action#171)
+      - dependency-name: "helm/chart-releaser-action"
 
   - package-ecosystem: "maven"
     directory: "/"
