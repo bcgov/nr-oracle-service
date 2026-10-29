@@ -42,6 +42,7 @@ jobs:
             triggers: |
               src/
               pom.xml
+              Dockerfile
           - package: nr-oracle-service-init
             build_file: Dockerfile.certs
             build_context: .
