@@ -3,10 +3,6 @@ name: Merge
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "*.md"
-      - ".github/**"
-      - "target/**"
   workflow_dispatch:
 
 concurrency:
