@@ -76,7 +76,7 @@ jobs:
               Dockerfile.certs
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
+      - uses: bcgov/actions/builder@091f1da89c669d36bf4899830381e5b12d2c889a # v0.11.0
         with:
           package: ${{ matrix.package }}
           tags: ${{ needs.semantic-release.outputs.version }}
