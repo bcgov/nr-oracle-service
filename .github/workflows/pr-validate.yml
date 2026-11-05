@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: bcgov/actions/pr-validate@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
-          add_markdown: |
+          markdown: |
             ---
 
             Thanks for the PR!
