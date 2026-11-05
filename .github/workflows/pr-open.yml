@@ -37,26 +37,26 @@ jobs:
         package: [nr-oracle-service, nr-oracle-service-init]
         include:
           - package: nr-oracle-service
-            build_file: Dockerfile
-            build_context: .
+            file: Dockerfile
+            context: .
             triggers: |
               src/
               pom.xml
               Dockerfile
           - package: nr-oracle-service-init
-            build_file: Dockerfile.certs
-            build_context: .
+            file: Dockerfile.certs
+            context: .
             triggers: |
               get_certs.sh
               Dockerfile.certs
     steps:
       - uses: actions/checkout@v7
-      - uses: bcgov/actions/builder@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
+      - uses: bcgov/actions/builder@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           package: ${{ matrix.package }}
           tags: ${{ github.event.number }}
-          build_file: ${{ matrix.build_file }}
-          build_context: ${{ matrix.build_context }}
+          file: ${{ matrix.file }}
+          context: ${{ matrix.context }}
           triggers: ${{ matrix.triggers }}
 
   deploys:
@@ -109,6 +109,7 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 1
     steps:
-      - uses: bcgov/actions/workflow-results@122a9b1c6c082b1b1f18c300020fbdc417b6b0b2 # v0.10.0
+      - uses: bcgov/actions/workflow-results@d209bb08aabe15e5e69aca53b24d338a7b2843d5 # v0.12.0
         with:
           needs: ${{ toJson(needs) }}
+          notify: 'false'
